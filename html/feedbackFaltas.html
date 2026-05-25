@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outbound System - Feedback de Faltas</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Overlay da Animação de Entrada -->
+    <div id="preloader">
+        <div class="brand-container" id="logoText"></div>
+        <div class="subtitle-intro">System</div>
+    </div>
+
+    <!-- Conteúdo Real do Site -->
+    <main id="main-content" class="hidden">
+        <div class="dashboard-wrapper">
+            <!-- Sidebar Retrátil -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h1 class="sidebar-title">
+                        <i class="fas fa-cube"></i>
+                        <a href="../index.html" class="volt-index">Outbound</a>
+                    </h1>
+                    <button class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+                </div>
+
+                <div class="sidebar-section">
+                    <p class="sidebar-label">MÓDULOS</p>
+                    <nav class="sidebar-menu">
+                        <a href="auditHse.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-clipboard-check"></i></span>
+                            <span class="menu-text">Auditoria HSE</span>
+                        </a>
+                        <a href="produtividade.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-chart-line"></i></span>
+                            <span class="menu-text">Produtividade</span>
+                        </a>
+                        <a href="#" class="menu-item active" data-screen="feedback-main">
+                            <span class="menu-icon"><i class="fas fa-comments"></i></span>
+                            <span class="menu-text">Feedback de Faltas</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-section">
+                    <p class="sidebar-label">FUTURAS TELAS</p>
+                    <nav class="sidebar-menu">
+                        <a href="#" class="menu-item"><span class="menu-text">Futura tela (CPT)</span></a>
+                        <a href="#" class="menu-item"><span class="menu-text">Futura tela (Backlog)</span></a>
+                        <a href="#" class="menu-item"><span class="menu-text">Futura tela (WTD)</span></a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-footer">
+                    <div class="datetime-box">
+                        <p id="current-date">--/--</p>
+                        <p id="current-time">00:00:00</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="main-wrapper">
+                <!-- Tela Principal de Feedback -->
+                <div id="screen-feedback-main" class="screen active">
+                    <div class="container">
+                        <!-- Título da Seção -->
+                        <section class="stats-section">
+                            <h1>Controle de Feedback de Faltas</h1>
+                        </section>
+
+                        <!-- Filtros de Período -->
+                        <section class="filters-section">
+                            <h2>Filtro de Período</h2>
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="feedback-date-start">Data Início</label>
+                                    <input type="date" id="feedback-date-start" class="filter-input">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="feedback-date-end">Data Fim</label>
+                                    <input type="date" id="feedback-date-end" class="filter-input">
+                                </div>
+                                <div class="filter-group filter-button-group">
+                                    <button id="apply-feedback-filters" class="btn-apply">Aplicar</button>
+                                    <button id="reset-feedback-filters" class="btn-reset">Limpar</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Cards de Resumo -->
+                        <section class="stats-section">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="total-faltas">-</div>
+                                    <div class="stat-label">Total de Faltas</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="feedbacks-pendentes">-</div>
+                                    <div class="stat-label">Feedbacks Pendentes</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="feedbacks-concluidos">-</div>
+                                    <div class="stat-label">Feedbacks Concluídos</div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Seção de Carrossel (Gráfico vs. Tabela) -->
+                        <section class="content-carousel-section">
+                            <div class="carousel-header">
+                                <h2 id="carousel-title">Análise de Faltas</h2>
+                                <div class="export-buttons-container" style="display: flex; gap: 10px;">
+                                    <button class="view-btn" id="carousel-prev" title="Anterior"><i class="fas fa-chevron-left"></i></button>
+                                    <button class="view-btn" id="carousel-next" title="Próximo"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+
+                            <!-- Slide 1: Gráfico de Barras -->
+                            <div id="carousel-slide-0" class="carousel-slide active">
+                                <div id="chart-container" style="height: 350px; margin-bottom: 2rem;">
+                                    <canvas id="feedbackChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Slide 2: Gráfico de Motivos -->
+                            <div id="carousel-slide-1" class="carousel-slide" style="display: none;">
+                                <div id="motivos-chart-container" style="height: 350px; margin-bottom: 2rem;">
+                                    <canvas id="motivosChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Slide 3: Tabela de Registros -->
+                            <div id="carousel-slide-2" class="carousel-slide" style="display: none;">
+                                <div class="export-buttons-container" style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 10px;">
+                                    <button id="open-forms-btn" class="btn-apply btn-form" style="margin-right: 10px;">
+                                        <i class="fas fa-plus"></i> Abrir Formulário
+                                    </button>
+                                    <button id="export-excel-btn" class="export-btn export-btn-excel" title="Exportar Excel">📊</button>
+                                    <button id="export-csv-btn" class="export-btn export-btn-csv" title="Exportar CSV">📄</button>
+                                </div>
+
+                                <div class="table-wrapper">
+                                <table class="audits-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Nome
+                                                    <input type="text" class="col-excel-filter-text" data-column="nome" placeholder="Buscar..." title="Digite para filtrar por nome">
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    CPF
+                                                    <input type="text" class="col-excel-filter-text" data-column="cpf" placeholder="Buscar..." title="Digite para filtrar por CPF">
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Setor
+                                                    <div class="multi-select-wrapper" data-column="setor">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Departamento
+                                                    <div class="multi-select-wrapper" data-column="departamento">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Empregador
+                                                    <div class="multi-select-wrapper" data-column="empregador">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Turno
+                                                    <div class="multi-select-wrapper" data-column="turno">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Coordenador
+                                                    <div class="multi-select-wrapper" data-column="coordenador">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Motivo
+                                                    <div class="multi-select-wrapper" data-column="motivo">
+                                                        <button class="multi-select-btn">
+                                                            <span class="multi-select-label">(Tudo)</span>
+                                                            <span class="multi-select-arrow">▼</span>
+                                                        </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Data Feedback
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Status Feedback
+                                                    <div class="multi-select-wrapper" data-column="status">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="feedback-table-body">
+                                        <!-- Dados serão inseridos via JS futuramente -->
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; padding: 20px;">Aguardando carregamento de dados...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </div>
+                            </div>
+                        </section>
+
+                        <div id="loading-spinner" class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>Carregando registros...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Feedback de Faltas -->
+        <div id="feedback-modal" class="feedback-modal">
+            <div class="feedback-modal-content">
+                <div class="feedback-modal-header">
+                    <h2 class="feedback-modal-title">Feedback de Falta</h2>
+                    <button class="feedback-modal-close" onclick="closeFeedbackModal()" title="Fechar">&times;</button>
+                </div>
+
+                <!-- Iframe do Formulário Google Apps Script -->
+                <iframe id="feedback-iframe" src="" frameborder="0" style="width: 100%; height: 600px; border-radius: 16px;"></iframe>
+            </div>
+        </div>
+
+        <style>
+            /* Modal de Feedback */
+            
+            .feedback-modal {
+                display: none;
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(10, 14, 39, 0.8);
+                backdrop-filter: blur(5px);
+                z-index: 3000;
+                justify-content: center;
+                align-items: center;
+                padding: 1rem;
+            }
+            
+            .feedback-modal.active {
+                display: flex;
+            }
+            
+            .feedback-modal-content {
+                background: rgba(30, 41, 59, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(56, 189, 248, 0.2);
+                border-radius: 16px;
+                max-width: 600px;
+                width: 100%;
+                max-height: 80vh;
+                overflow-y: auto;
+                padding: 2rem;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            }
+            
+            .feedback-modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            }
+            
+            .feedback-modal-title {
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: #38bdf8;
+            }
+            
+            .feedback-modal-close {
+                background: none;
+                border: none;
+                color: #94a3b8;
+                font-size: 2rem;
+                cursor: pointer;
+                transition: all 0.3s;
+                padding: 0;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .feedback-modal-close:hover {
+                color: #38bdf8;
+                transform: rotate(90deg);
+            }
+            
+            .feedback-form {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .feedback-form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .feedback-label {
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #cbd5e1;
+                text-transform: uppercase;
+            }
+            
+            .required {
+                color: #ef4444;
+            }
+            
+            .feedback-input,
+            .feedback-textarea {
+                padding: 0.75rem 1rem;
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(56, 189, 248, 0.2);
+                border-radius: 8px;
+                color: #e0e7ff;
+                font-family: 'Montserrat', sans-serif;
+                font-size: 0.9rem;
+                transition: all 0.3s;
+            }
+            
+            .feedback-input:focus,
+            .feedback-textarea:focus {
+                outline: none;
+                border-color: #38bdf8;
+                background: rgba(15, 23, 42, 0.8);
+                box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+            }
+            
+            .feedback-input:readonly {
+                background: rgba(15, 23, 42, 0.4);
+                color: #94a3b8;
+                cursor: not-allowed;
+            }
+            
+            .feedback-textarea {
+                resize: vertical;
+                min-height: 100px;
+                font-family: 'Montserrat', sans-serif;
+            }
+            
+            .feedback-form-actions {
+                display: flex;
+                gap: 1rem;
+                margin-top: 1rem;
+                justify-content: flex-end;
+            }
+            
+            .btn-cancel,
+            .btn-submit {
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                font-family: 'Montserrat', sans-serif;
+                font-size: 0.9rem;
+            }
+            
+            .btn-cancel {
+                background: rgba(56, 189, 248, 0.1);
+                color: #38bdf8;
+                border: 1px solid rgba(56, 189, 248, 0.3);
+            }
+            
+            .btn-cancel:hover {
+                background: rgba(56, 189, 248, 0.2);
+            }
+            
+            .btn-submit {
+                background: #38bdf8;
+                color: #0f172a;
+            }
+            
+            .btn-submit:hover {
+                background: #0ea5e9;
+            }
+            
+            .btn-submit:disabled {
+                background: #64748b;
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
+        </style>
+    </main>
+
+    <!-- Scripts Core -->
+    <script src="../js/core/utils.js"></script>
+    <script src="../js/core/animation.js"></script>
+    <script src="../js/core/ui-controller.js"></script>
+    <script src="../js/core/portal.js"></script>
+
+    <!-- Módulo Específico -->
+    <script src="../js/modules/feedback/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outbound System - Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+
+<body>
+    <!-- Overlay da Animação de Entrada -->
+    <div id="preloader">
+        <div class="brand-container" id="logoText"></div>
+        <div class="subtitle-intro">System</div>
+    </div>
+
+    <!-- Conteúdo Real do Site -->
+    <main id="main-content" class="hidden">
+        <div class="dashboard-wrapper">
+            <!-- Sidebar Retrátil -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h1 class="sidebar-title">
+                        <i class="fas fa-cube"></i>
+                        <a href="../index.html" class="volt-index">Outbound</a>
+                    </h1>
+                    <button class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+                </div>
+
+                <div class="sidebar-section">
+                    <p class="sidebar-label">MÓDULOS</p>
+                    <nav class="sidebar-menu">
+                        <!-- Menu com submenu para Auditoria HSE -->
+                        <div class="menu-group">
+                            <a href="#" class="menu-item menu-parent active" id="audit-parent">
+                                <span class="menu-icon"><i class="fas fa-clipboard-check"></i></span>
+                                <span class="menu-text">Auditoria HSE</span>
+                                <span class="menu-arrow"><i class="fas fa-chevron-down"></i></span>
+                            </a>
+                            <nav class="submenu active" id="audit-submenu">
+                                <a href="#" class="menu-item submenu-item active" data-screen="audit-dashboard">
+                                    <span class="menu-icon"><i class="fas fa-chart-pie"></i></span>
+                                    <span class="menu-text">Dashboard Geral</span>
+                                </a>
+                                <a href="#" class="menu-item submenu-item" data-screen="audit-collaborator">
+                                    <span class="menu-icon"><i class="fas fa-users-gear"></i></span>
+                                    <span class="menu-text">Auditorias por Colaborador</span>
+                                </a>
+                            </nav>
+                        </div>
+                        <a href="produtividade.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-chart-line"></i></span>
+                            <span class="menu-text">Produtividade</span>
+                        </a>
+                        <a href="feedbackFaltas.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-comments"></i></span>
+                            <span class="menu-text">Feedback de Faltas</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-section">
+                    <p class="sidebar-label">FUTURAS TELAS</p>
+                    <nav class="sidebar-menu">
+                        <a href="#" class="menu-item"><span class="menu-text">Futura tela (CPT)</span></a>
+                        <a href="#" class="menu-item"><span class="menu-text">Futura tela (Backlog)</span></a>
+                        <a href="#" class="menu-item"><span class="menu-text">Futura tela (WTD)</span></a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-footer">
+                    <div class="datetime-box">
+                        <p id="current-date">--/--</p>
+                        <p id="current-time">00:00:00</p>
+                        <p class="datetime-updated"><span id="last-updated" style="display:none;">--:--:--</span></p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="main-wrapper">
+                <!-- Tela: Dashboard Geral de Auditoria HSE -->
+                <div id="screen-audit-dashboard" class="screen active">
+                    <div class="container">
+                        <!-- Filtros Gerais -->
+                        <section class="filters-section">
+                            <h2>Filtros Gerais</h2>
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="department-filter">Departamento</label>
+                                    <select id="department-filter" class="filter-input">
+                                        <option value="">Todos os Departamentos</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="date-start">Data Início</label>
+                                    <input type="date" id="date-start" class="filter-input">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="date-end">Data Fim</label>
+                                    <input type="date" id="date-end" class="filter-input">
+                                </div>
+                                <div class="filter-group filter-button-group">
+                                    <button id="apply-filters" class="btn-apply">Aplicar Filtros</button>
+                                    <button id="reset-filters" class="btn-reset">Limpar</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Estatísticas -->
+                        <section class="stats-section">
+                            <h1>Dashboard de Auditorias HSE</h1>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="total-audits">-</div>
+                                    <div class="stat-label">Total de Auditorias</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="avg-score">-</div>
+                                    <div class="stat-label">Score Médio</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="total-departments">-</div>
+                                    <div class="stat-label">Departamentos</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="conformities">-</div>
+                                    <div class="stat-label">Conformidades</div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Carrossel -->
+                        <section class="content-carousel-section">
+                            <div class="carousel-header">
+                                <h2 id="carousel-title">Visão Geral (Gráfico)</h2>
+                                <div class="carousel-controls">
+                                    <button id="carousel-prev" class="carousel-btn">◀</button>
+                                    <button id="carousel-next" class="carousel-btn">▶</button>
+                                </div>
+                            </div>
+
+                            <div class="carousel-container">
+                                <div class="carousel-slide active">
+                                    <div class="chart-container"><canvas id="departmentChart"></canvas></div>
+                                </div>
+                                <div class="carousel-slide">
+                                    <div class="chart-container"><canvas id="scoreChart"></canvas></div>
+                                </div>
+                                <div class="carousel-slide">
+                                    <div class="table-section">
+                                        <div class="table-wrapper">
+                                            <table class="audits-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Departamento</th>
+                                                        <th>Usuário</th>
+                                                        <th>Formulário</th>
+                                                        <th>Score</th>
+                                                        <th>Conf.</th>
+                                                        <th>Não Conf.</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="table-body"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="carousel-indicators">
+                                <span class="indicator active" data-slide="0"></span>
+                                <span class="indicator" data-slide="1"></span>
+                                <span class="indicator" data-slide="2"></span>
+                            </div>
+                        </section>
+
+                        <div id="loading-spinner" class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p id="loading-text">Carregando dados...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tela: Auditorias por Colaborador -->
+                <div id="screen-audit-collaborator" class="screen">
+                    <div class="container">
+                        <!-- Título da Seção -->
+                        <section class="stats-section">
+                            <h1>Auditorias por Colaborador</h1>
+                        </section>
+
+                        <!-- Filtros de Período -->
+                        <section class="filters-section">
+                            <h2>Filtro de Período</h2>
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="collaborator-date-start">Data Início</label>
+                                    <input type="date" id="collaborator-date-start" class="filter-input">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="collaborator-date-end">Data Fim</label>
+                                    <input type="date" id="collaborator-date-end" class="filter-input">
+                                </div>
+                                <div class="filter-group filter-button-group">
+                                    <button id="apply-collab-period-filters" class="btn-apply">Aplicar</button>
+                                    <button id="reset-collab-period-filters" class="btn-reset">Limpar</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Cards de Estatísticas -->
+                        <section class="stats-section">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="collab-meta-atingida">-</div>
+                                    <div class="stat-label">Meta Atingida</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="collab-meta-nao-atingida">-</div>
+                                    <div class="stat-label">Meta Não Atingida</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="collab-sem-auditorias">-</div>
+                                    <div class="stat-label">Sem Auditorias</div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Tabela de Auditorias por Colaborador com Filtros Excel -->
+                        <section class="content-carousel-section">
+                            <div class="carousel-header">
+                                <h2>Tabela de Colaboradores</h2>
+                                <!-- Botoes de Exportacao -->
+                                <div class="export-buttons-container">
+                                    <button id="export-excel-btn" class="export-btn export-btn-excel" title="Exportar para Excel" aria-label="Exportar para Excel">
+                                        📊
+                                    </button>
+                                    <button id="export-csv-btn" class="export-btn export-btn-csv" title="Exportar para CSV" aria-label="Exportar para CSV">
+                                        📄
+                                    </button>
+                                    <button id="export-report-btn" class="export-btn export-btn-report" title="Exportar Relatório Visual" aria-label="Exportar Relatório Visual">
+                                        📋
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Tabela -->
+                            <div class="table-wrapper">
+                                <table class="audits-table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Colaborador
+                                                    <input type="text" class="col-excel-filter-text" data-column="nome" placeholder="Buscar..." title="Digite para filtrar por nome">
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Departamento
+                                                    <div class="multi-select-wrapper" data-column="departamento">
+                                                        <button class="multi-select-btn">
+                                                            <span class="multi-select-label">(Tudo)</span>
+                                                            <span class="multi-select-arrow">▼</span>
+                                                        </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Função
+                                                    <div class="multi-select-wrapper" data-column="funcao">
+                                                        <button class="multi-select-btn">
+                                                            <span class="multi-select-label">(Tudo)</span>
+                                                            <span class="multi-select-arrow">▼</span>
+                                                        </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th style="text-align:center">Período</th>
+                                            <th style="text-align:center">Realizado</th>
+                                            <th style="text-align:center">Meta</th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Status
+                                                    <div class="multi-select-wrapper" data-column="status">
+                                                        <button class="multi-select-btn">
+                                                            <span class="multi-select-label">(Tudo)</span>
+                                                            <span class="multi-select-arrow">▼</span>
+                                                        </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <div class="multi-select-options">
+                                                                <label class="multi-select-option"><input type="checkbox" value="Meta Atingida"> Meta Atingida</label>
+                                                                <label class="multi-select-option"><input type="checkbox" value="Meta Não Atingida"> Meta Não Atingida</label>
+                                                                <label class="multi-select-option"><input type="checkbox" value="Sem Auditorias"> Sem Auditorias</label>
+                                                            </div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="collaborator-table-body"></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área Oculta para Captura do Relatório Visual -->
+        <div id="report-export-wrapper" style="position: absolute; left: -9999px; top: -9999px;">
+            <!-- O conteúdo será injetado pelo report-engine.js -->
+        </div>
+    </main>
+
+    <!-- Scripts Core -->
+    <script src="../js/core/utils.js"></script>
+    <script src="../js/core/ui-controller.js"></script>
+    <script src="../js/core/animation.js"></script>
+    
+    <!-- Scripts Módulo Audit -->
+    <script src="../js/modules/audit/audit-dashboard.js"></script>
+    <script src="../js/modules/audit/audit-collaborators.js"></script>
+    <script src="../js/modules/audit/audit-export.js"></script>
+    <script src="../js/modules/audit/report-engine.js"></script>
+    <script src="../js/modules/audit/audit-report.js"></script>
+    <script src="../js/modules/audit/main.js"></script>
+</body>
+
+</html>
