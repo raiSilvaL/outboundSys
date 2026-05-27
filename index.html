@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outbound System | Portal Central</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Overlay da Animação de Entrada -->
+    <div id="preloader">
+        <div class="brand-container" id="logoText"></div>
+        <div class="subtitle-intro">System</div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <main id="main-content" class="hidden">
+        <div class="hub-container">
+            <header class="hub-header">
+                <h1 class="hub-title">Outbound System</h1>
+                <p class="hub-subtitle">Selecione o módulo que deseja acessar para gerenciar suas operações.</p>
+            </header>
+
+            <div class="modules-grid">
+                <!-- Módulo: Auditoria HSE -->
+                <a href="html/auditHse.html" class="module-card">
+                    <div class="module-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="module-content">
+                        <h3>Auditoria HSE</h3>
+                        <p>Gestão completa de conformidades, score de segurança e evolução diária de respostas da equipe.</p>
+                    </div>
+                    <div class="module-status status-active">
+                        <i class="fas fa-check-circle"></i> Disponível
+                    </div>
+                </a>
+
+                <!-- Módulo Futuro: CPT -->
+                <div class="module-card disabled">
+                    <span class="badge-soon">Em breve</span>
+                    <div class="module-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="module-content">
+                        <h3>Módulo CPT</h3>
+                        <p>Planejamento e controle de processos técnicos integrados ao fluxo de trabalho.</p>
+                    </div>
+                    <div class="module-status status-pending">
+                        <i class="fas fa-clock"></i> Em desenvolvimento
+                    </div>
+                </div>
+
+                <!-- Módulo Futuro: Backlog -->
+                <div class="module-card disabled">
+                    <span class="badge-soon">Em breve</span>
+                    <div class="module-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="module-content">
+                        <h3>Backlog Operacional</h3>
+                        <p>Gestão de pendências e priorização de atividades críticas para a operação.</p>
+                    </div>
+                    <div class="module-status status-pending">
+                        <i class="fas fa-clock"></i> Em desenvolvimento
+                    </div>
+                </div>
+
+                <!-- Módulo Futuro: WTD -->
+                <div class="module-card disabled">
+                    <span class="badge-soon">Em breve</span>
+                    <div class="module-icon">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
+                    <div class="module-content">
+                        <h3>Módulo WTD</h3>
+                        <p>Análise de desempenho semanal e tendências operacionais (Week-to-Date).</p>
+                    </div>
+                    <div class="module-status status-pending">
+                        <i class="fas fa-clock"></i> Em desenvolvimento
+                    </div>
+                </div>
+
+                <!-- Módulo: Produtividade -->
+                <a href="html/produtividade.html" class="module-card">
+                    <div class="module-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="module-content">
+                        <h3>Produtividade</h3>
+                        <p>Acompanhamento de métricas de produtividade e eficiência operacional da equipe.</p>
+                    </div>
+                    <div class="module-status status-active">
+                        <i class="fas fa-check-circle"></i> Disponível
+                    </div>
+                </a>
+
+                <!-- Módulo: Feedback de Faltas -->
+                <a href="html/feedbackFaltas.html" class="module-card">
+                    <div class="module-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="module-content">
+                        <h3>Feedback de Faltas</h3>
+                        <p>Controle e gestão de justificativas e feedbacks relacionados ao registro de faltas.</p>
+                    </div>
+                    <div class="module-status status-active">
+                        <i class="fas fa-check-circle"></i> Disponível
+                    </div>
+                </a>
+            </div>
+
+            <footer class="footer-hub">
+                &copy; 2026 Outbound System - Ecossistema de Gestão Operacional.
+            </footer>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/core/animation.js"></script>
+    <script src="js/core/portal.js"></script>
+</body>
+
+</html>
