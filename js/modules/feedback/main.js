@@ -4,7 +4,7 @@
  */
 
 const API_URL = "https://script.google.com/macros/s/AKfycby3Jm4vjjg-ArnnbwQui_LiBOH-nqiATyL47X-xel5PR4JJBHrpKj9sCoCQl3UsR9AQnQ/exec?aba=Registro%20de%20Faltas";
-const BASE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_FXYPLswdU9UJOfRHSePE6cbwCeFa51DhA4U1cBPnHqUMn_ruujHS3WBx6ky5Zz6zpw/exec";
+const BASE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFUCCCf_WBbb1k9hMHQWYmIZaiutECp2PvGfgm32NtMTepBwgwy1OAzdB3c1yuXI-E4Q/exec";
 
 // Estado global
 let allFeedbackData = [];
@@ -96,13 +96,15 @@ async function loadFeedbackData() {
                 coordenador: (item["COORDENADOR"] || item["Coordenador"] || '').toString().trim(),
                 motivo: (item["Motivo da falta"] || item["MOTIVO DA FALTA"] || item["Motivo"] || '').toString().trim(),
                 dataFeedback: item["Data do feedback"] || item["DATA DO FEEDBACK"] || '',
-                statusOriginal: (item["Status"] || '').toString().trim()
+                statusOriginal: (item["Status"] || '').toString().trim(),
+                observacao: (item["AB"] || item["Observacao"] || item["Observação"] || '').toString().trim(),
+                quemRespondeu: (item["AC"] || item["Quem respondeu"] || item["Quem Respondeu"] || '').toString().trim()
             };
 
             // Calcular status
             const hasFeedbackDate = normalizedItem.dataFeedback && normalizedItem.dataFeedback !== "" && normalizedItem.dataFeedback !== "-";
             normalizedItem.statusCalculado = hasFeedbackDate ? 'Concluído' : 'Pendente';
-            
+
             return normalizedItem;
         });
 
@@ -133,7 +135,7 @@ function renderFeedbackTable(data) {
     if (!tableBody) return;
 
     if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Nenhum registro encontrado.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="12" style="text-align: center;">Nenhum registro encontrado.</td></tr>';
         return;
     }
 
@@ -152,8 +154,9 @@ function renderFeedbackTable(data) {
                 <td>${item.empregador || '-'}</td>
                 <td>${item.turno || '-'}</td>
                 <td>${item.coordenador || '-'}</td>
-                <td>${item.motivo || '-'}</td>
                 <td>${dataFeedbackStr}</td>
+                <td>${item.motivo || '-'}</td>
+                <td>${item.observacao || '-'}</td>
                 <td><span class="status-badge ${statusClass}">${item.statusCalculado}</span></td>
             </tr>
         `;
@@ -257,13 +260,13 @@ function initializeHeaderFilters() {
     const columns = ['setor', 'departamento', 'empregador', 'turno', 'coordenador', 'motivo', 'status'];
     columns.forEach(col => {
         initMultiSelect(col);
-        
+
         // Popular opções a partir dos dados normalizados
         const values = new Set(allFeedbackData.map(item => {
             if (col === 'status') return item.statusCalculado;
             return item[col];
         }));
-        
+
         populateMultiSelectOptions(col, values);
     });
 }
@@ -280,7 +283,7 @@ function initMultiSelect(column) {
     // Remover listeners antigos se houver (para evitar duplicidade ao recarregar)
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
-    
+
     newBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isOpen = dropdown.classList.contains('open');
@@ -371,7 +374,7 @@ function populateMultiSelectOptions(column, values) {
     if (!wrapper) return;
     const optionsContainer = wrapper.querySelector('.multi-select-options');
     if (!optionsContainer) return;
-    
+
     optionsContainer.innerHTML = [...values].filter(v => v && v !== '-' && v !== '').sort().map(v => `
         <label class="multi-select-option">
             <input type="checkbox" value="${v}" ${feedbackFilters[column].has(v) ? 'checked' : ''}>
@@ -404,7 +407,7 @@ function getTableDataForExport() {
 }
 
 function getTableHeaders() {
-    return ['Data Falta', 'Nome', 'CPF', 'Setor', 'Departamento', 'Empregador', 'Turno', 'Coordenador', 'Motivo', 'Data Feedback', 'Status'];
+    return ['Data Falta', 'Nome', 'CPF', 'Setor', 'Departamento', 'Empregador', 'Turno', 'Coordenador', 'Data Feedback', 'Motivo', 'Observacao', 'Status'];
 }
 
 function exportTableToExcel() {
@@ -476,6 +479,10 @@ function closeFeedbackModal() {
     if (iframe) {
         iframe.src = 'about:blank';
     }
+    // Recarregar dados da tabela apos fechar o modal
+    setTimeout(() => {
+        loadFeedbackData();
+    }, 500);
 }
 
 // Listener para fechar o modal ao clicar fora dele
@@ -567,8 +574,7 @@ function renderFeedbackChart(data) {
         type: 'bar',
         data: {
             labels: sortedDates,
-            datasets: [
-                {
+            datasets: [{
                     label: 'Justificadas',
                     data: justificadas,
                     backgroundColor: 'rgba(34, 197, 94, 0.7)',
