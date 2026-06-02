@@ -1,5 +1,18 @@
 /* Reset e Base */
 
+:root {
+    --primary: #38bdf8;
+    --primary-dark: #0284c7;
+    --secondary: #8b5cf6;
+    --dark: #0f172a;
+    --darker: #0a0e27;
+    --slate: #94a3b8;
+    --light: #e0e7ff;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -17,7 +30,7 @@ body {
 
 /* Overlay da Animação */
 
-.intro-overlay {
+#preloader, .intro-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -25,10 +38,11 @@ body {
     height: 100vh;
     background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    transition: opacity 1s ease-out, visibility 1s;
+    transition: opacity 1s ease-out, visibility 1s, transform 1s cubic-bezier(0.85, 0, 0.15, 1);
 }
 
 .intro-overlay.fade-out {
@@ -1541,11 +1555,18 @@ body {
 
 .modules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 400px));
+    justify-content: center;
     gap: 2rem;
     width: 100%;
     max-width: 1200px;
     animation: fadeInUp 1s ease-out 0.3s both;
+}
+
+@media (max-width: 480px) {
+    .modules-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .module-card {
@@ -1729,4 +1750,97 @@ body {
     background: rgba(100, 116, 139, 0.2);
     color: #94a3b8;
     border: 1px solid rgba(100, 116, 139, 0.4);
+}
+
+
+/* User Card no Sidebar */
+.user-card {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 8px;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.user-card:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.4);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #38bdf8 0%, #8b5cf6 100%);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #e0e7ff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-level {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin: 0.2rem 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-logout {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.user-logout:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+}
+
+.sidebar.collapsed .user-card {
+    flex-direction: column;
+    padding: 0.5rem;
+}
+
+.sidebar.collapsed .user-info {
+    display: none;
+}
+
+.sidebar.collapsed .user-logout {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
 }

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Usuários | Outbound System</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gestao-usuarios-container {
+            padding: 2rem;
+        }
+
+        .gestao-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .gestao-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #e0e7ff;
+        }
+
+        .gestao-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-action.secondary {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+
+        .btn-action.secondary:hover {
+            background: rgba(139, 92, 246, 0.25);
+        }
+
+        .filtros-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filtro-input {
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 8px;
+            color: #e0e7ff;
+            font-size: 0.9rem;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filtro-input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        .tabela-container {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .tabela-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(56, 189, 248, 0.1);
+            border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            color: #38bdf8;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+            color: #cbd5e1;
+        }
+
+        tbody tr:hover {
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .usuario-nome {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .usuario-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #38bdf8 0%, #8b5cf6 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .nivel-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nivel-ps { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+        .nivel-pa { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+        .nivel-coordenador { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .nivel-supervisor { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+        .nivel-gerente { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .nivel-adm { background: rgba(251, 191, 36, 0.2); color: #fcd34d; }
+
+        .usuario-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 6px;
+            color: #38bdf8;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: rgba(56, 189, 248, 0.25);
+            border-color: #38bdf8;
+        }
+
+        .btn-icon.delete {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .btn-icon.delete:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: #ef4444;
+        }
+
+        .usuarios-empty {
+            text-align: center;
+            padding: 3rem;
+            color: #94a3b8;
+        }
+
+        .usuarios-empty i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        #pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        #pagination button {
+            padding: 0.5rem 0.75rem;
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        #pagination button:hover:not(:disabled) {
+            background: rgba(56, 189, 248, 0.25);
+        }
+
+        #pagination button.active {
+            background: #38bdf8;
+            color: #0f172a;
+        }
+
+        #pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #e0e7ff;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #ef4444;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 8px;
+            color: #e0e7ff;
+            font-size: 0.9rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        .form-message {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .form-message.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .form-message.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .form-buttons button {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .form-buttons button[type="submit"] {
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            color: white;
+        }
+
+        .form-buttons button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .form-buttons button[type="button"] {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+
+        .form-buttons button[type="button"]:hover {
+            background: rgba(139, 92, 246, 0.25);
+        }
+
+        #csv-input {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .gestao-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .gestao-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn-action {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .filtros-container {
+                flex-direction: column;
+            }
+
+            .filtro-input {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .usuario-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="preloader">
+        <div class="brand-container" id="logoText"></div>
+        <div class="subtitle-intro">System</div>
+    </div>
+
+    <main id="main-content" class="hidden">
+        <div class="dashboard-wrapper">
+            <!-- Sidebar Retrátil -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h1 class="sidebar-title">
+                        <i class="fas fa-cube"></i>
+                        <a href="../index.html" class="volt-index">Outbound</a>
+                    </h1>
+                    <button class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+                </div>
+
+                <div class="sidebar-section">
+                    <p class="sidebar-label">MÓDULOS</p>
+                    <nav class="sidebar-menu">
+                        <a href="auditHse.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-clipboard-check"></i></span>
+                            <span class="menu-text">Auditoria HSE</span>
+                        </a>
+                        <a href="produtividade.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-chart-line"></i></span>
+                            <span class="menu-text">Produtividade</span>
+                        </a>
+                        <a href="feedbackFaltas.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-comments"></i></span>
+                            <span class="menu-text">Feedback de Faltas</span>
+                        </a>
+                        <a href="gestaoUsuarios.html" class="menu-item active">
+                            <span class="menu-icon"><i class="fas fa-users-cog"></i></span>
+                            <span class="menu-text">Gestão de Usuários</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-section" id="future-telas-section" style="display: none;">
+                    <p class="sidebar-label">FUTURAS TELAS</p>
+                    <nav class="sidebar-menu">
+                        <a href="#" class="menu-item"><span class="menu-text">Futura tela (CPT)</span></a>
+                        <a href="#" class="menu-item"><span class="menu-text">Futura tela (Backlog)</span></a>
+                        <a href="#" class="menu-item"><span class="menu-text">Futura tela (WTD)</span></a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-footer">
+                    <div class="user-card">
+                        <div class="user-avatar" id="sidebar-user-avatar">--</div>
+                        <div class="user-info">
+                            <p class="user-name" id="sidebar-user-name">Usuário</p>
+                            <p class="user-level" id="sidebar-user-level">Nível</p>
+                        </div>
+                        <button id="sidebar-logout" class="user-logout" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="main-wrapper" style="overflow-y: auto;">
+            <div class="gestao-usuarios-container">
+                <div class="gestao-header">
+                    <h1 class="gestao-title">Gestão de Usuários</h1>
+                    <div class="gestao-actions">
+                        <button id="btn-novo-usuario" class="btn-action">
+                            <i class="fas fa-user-plus"></i> Novo Usuário
+                        </button>
+                        <button id="btn-importar-csv" class="btn-action secondary">
+                            <i class="fas fa-upload"></i> Importar CSV
+                        </button>
+                        <button id="btn-exportar-csv" class="btn-action secondary">
+                            <i class="fas fa-download"></i> Exportar CSV
+                        </button>
+                        <input type="file" id="csv-input" accept=".csv">
+                    </div>
+                </div>
+
+                <div class="filtros-container">
+                    <input type="text" id="filter-nome" class="filtro-input" placeholder="Filtrar por nome...">
+                    <select id="filter-nivel" class="filtro-input">
+                        <option value="">Todos os níveis</option>
+                        <option value="PS">PS</option>
+                        <option value="PA">PA</option>
+                        <option value="Coordenador">Coordenador</option>
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="Gerente">Gerente</option>
+                        <option value="ADM">ADM</option>
+                    </select>
+                    <select id="filter-turno" class="filtro-input">
+                        <option value="">Todos os turnos</option>
+                        <option value="1° Turno">1° Turno</option>
+                        <option value="2° Turno">2° Turno</option>
+                        <option value="3° Turno">3° Turno</option>
+                        <option value="Comercial">Comercial</option>
+                    </select>
+                </div>
+
+                <div class="tabela-container">
+                    <div class="tabela-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Função</th>
+                                    <th>Turno</th>
+                                    <th>Nível</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuarios-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="usuarios-empty" class="usuarios-empty" style="display: none;">
+                        <i class="fas fa-inbox"></i>
+                        <p>Nenhum usuário encontrado</p>
+                    </div>
+                </div>
+
+                <div id="pagination"></div>
+            </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Usuário -->
+    <div id="modal-usuario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title-text">Novo Usuário</h2>
+                <button id="modal-close" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="form-message"></div>
+
+            <form id="usuario-form">
+                <div class="form-group">
+                    <label for="form-nome">Nome</label>
+                    <input type="text" id="form-nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="form-email">Email</label>
+                    <input type="email" id="form-email" placeholder="usuario@luftsolutions.com.br" required>
+                </div>
+
+                <input type="hidden" id="form-funcao">
+
+                <div class="form-group">
+                    <label for="form-turno">Turno</label>
+                    <select id="form-turno" required>
+                        <option value="">Selecione um turno</option>
+                        <option value="1° Turno">1° Turno</option>
+                        <option value="2° Turno">2° Turno</option>
+                        <option value="3° Turno">3° Turno</option>
+                        <option value="Comercial">Comercial</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="form-nivel">Nível</label>
+                    <select id="form-nivel" required>
+                        <option value="">Selecione um nível</option>
+                        <option value="PS">PS (Problem Solver)</option>
+                        <option value="PA">PA (Problem Assistant)</option>
+                        <option value="Coordenador">Coordenador</option>
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="Gerente">Gerente</option>
+                        <option value="ADM">ADM (Analista)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="form-senha">Senha</label>
+                    <input type="password" id="form-senha" placeholder="Mínimo 8 caracteres com letras e números" required>
+                    <div id="senha-validation" class="form-validation" style="margin-top: 0.5rem; font-size: 0.8rem; display: none;">
+                        <p id="senha-length" style="color: #cbd5e1; margin: 0.25rem 0;">
+                            <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.25rem;"></i>
+                            Mínimo 8 caracteres
+                        </p>
+                        <p id="senha-letters" style="color: #cbd5e1; margin: 0.25rem 0;">
+                            <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.25rem;"></i>
+                            Contém letras
+                        </p>
+                        <p id="senha-numbers" style="color: #cbd5e1; margin: 0.25rem 0;">
+                            <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 0.25rem;"></i>
+                            Contém números
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn-action">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <button type="button" id="btn-form-cancel" class="btn-action">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts Core -->
+    <script src="../js/core/utils.js"></script>
+    <script src="../js/core/ui-controller.js"></script>
+    <script src="../js/core/animation.js"></script>
+    <script src="../js/core/auth.js"></script>
+    <script src="../js/core/permissions.js"></script>
+    <script src="../js/core/menu-controller.js"></script>
+    <script src="../js/core/sidebar-user.js"></script>
+    
+    <!-- Scripts Módulo Usuários -->
+    <script src="../js/modules/usuarios/usuarios-manager.js"></script>
+    <script src="../js/modules/usuarios/main.js"></script>
+</body>
+
+</html>

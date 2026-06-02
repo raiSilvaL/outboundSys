@@ -205,10 +205,14 @@
                             <span class="menu-icon"><i class="fas fa-comments"></i></span>
                             <span class="menu-text">Feedback de Faltas</span>
                         </a>
+                        <a href="gestaoUsuarios.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-users-cog"></i></span>
+                            <span class="menu-text">Gestão de Usuários</span>
+                        </a>
                     </nav>
                 </div>
 
-                <div class="sidebar-section">
+                <div class="sidebar-section" id="future-telas-section" style="display: none;">
                     <p class="sidebar-label">FUTURAS TELAS</p>
                     <nav class="sidebar-menu">
                         <a href="#" class="menu-item"><span class="menu-text">Futura tela (CPT)</span></a>
@@ -218,9 +222,15 @@
                 </div>
 
                 <div class="sidebar-footer">
-                    <div class="datetime-box">
-                        <p id="current-date">--/--</p>
-                        <p id="current-time">00:00:00</p>
+                    <div class="user-card">
+                        <div class="user-avatar" id="sidebar-user-avatar">--</div>
+                        <div class="user-info">
+                            <p class="user-name" id="sidebar-user-name">Usuário</p>
+                            <p class="user-level" id="sidebar-user-level">Nível</p>
+                        </div>
+                        <button id="sidebar-logout" class="user-logout" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
                     </div>
                 </div>
             </aside>
@@ -460,11 +470,14 @@
         });
     </script>
 
-    <!-- Scripts Core -->
+        <!-- Scripts Core -->
     <script src="../js/core/utils.js"></script>
     <script src="../js/core/ui-controller.js"></script>
     <script src="../js/core/animation.js"></script>
-    
+    <script src="../js/core/auth.js"></script>
+    <script src="../js/core/permissions.js"></script>
+    <script src="../js/core/menu-controller.js"></script>
+    <script src="../js/core/sidebar-user.js"></script>
     <!-- Scripts Módulo Prod -->
     <script src="../js/modules/prod/prod-dashboard.js"></script>
     <script src="../js/modules/prod/prod-ranking.js"></script>

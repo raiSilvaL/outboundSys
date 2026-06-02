@@ -115,6 +115,20 @@
                         <i class="fas fa-check-circle"></i> Disponível
                     </div>
                 </a>
+
+                <!-- Módulo: Gestão de Usuários -->
+                <a href="html/gestaoUsuarios.html" class="module-card" data-module="gestao-usuarios">
+                    <div class="module-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div class="module-content">
+                        <h3>Gestão de Usuários</h3>
+                        <p>Gerenciamento completo de usuários, permissões e importação/exportação de dados.</p>
+                    </div>
+                    <div class="module-status status-active">
+                        <i class="fas fa-check-circle"></i> Disponível
+                    </div>
+                </a>
             </div>
 
             <footer class="footer-hub">
@@ -125,6 +139,88 @@
 
     <!-- Scripts -->
     <script src="js/core/animation.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/permissions.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!auth || !auth.estaAutenticado()) {
+                window.location.href = 'html/login.html';
+                return;
+            }
+
+            const usuario = auth.obterUsuarioAtual();
+            
+            // Adicionar indicador de usuário no canto superior direito
+            const header = document.querySelector('.hub-header');
+            if (header) {
+                const userIndicator = document.createElement('div');
+                userIndicator.style.cssText = 'position: absolute; top: 2rem; right: 2rem; display: flex; align-items: center; gap: 1rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); padding: 0.75rem 1rem; border-radius: 8px;';
+                
+                const iniciais = usuario.nome.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                
+                userIndicator.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #38bdf8 0%, #8b5cf6 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.8rem;">${iniciais}</div>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="color: #e0e7ff; font-weight: 700; font-size: 0.85rem;">${usuario.nome}</span>
+                            <span style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">${usuario.nivel}</span>
+                        </div>
+                    </div>
+                    <button id="logout-btn" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 0.5rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 700; transition: all 0.3s; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                `;
+                header.parentElement.insertBefore(userIndicator, header);
+                
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    if (confirm('Tem certeza que deseja fazer logout?')) {
+                        auth.logout();
+                    }
+                });
+            }
+
+            // Filtrar módulos por permissão
+            const modulos = document.querySelectorAll('.module-card');
+            const nivelHierarquia = ['PS', 'PA', 'Coordenador', 'Supervisor', 'Gerente', 'ADM'];
+            const indexNivel = nivelHierarquia.indexOf(usuario.nivel);
+            
+            modulos.forEach(modulo => {
+                let mostrar = true;
+                
+                // Verificar permissões de acesso
+                if (modulo.href) {
+                    const href = modulo.href;
+                    
+                    // Auditoria HSE - apenas Supervisor+
+                    if (href.includes('auditHse')) {
+                        mostrar = indexNivel >= nivelHierarquia.indexOf('Supervisor');
+                    }
+                    // Feedback de Faltas - apenas Coordenador+
+                    else if (href.includes('feedbackFaltas')) {
+                        mostrar = indexNivel >= nivelHierarquia.indexOf('Coordenador');
+                    }
+                    // Gestão de Usuários - apenas Gerente+
+                    else if (href.includes('gestaoUsuarios')) {
+                        mostrar = indexNivel >= nivelHierarquia.indexOf('Gerente');
+                    }
+                    // Produtividade - todos
+                    else if (href.includes('produtividade')) {
+                        mostrar = true;
+                    }
+                }
+                
+                // Telas em desenvolvimento - apenas Supervisor+
+                if (modulo.classList.contains('disabled')) {
+                    const indexSupervisor = nivelHierarquia.indexOf('Supervisor');
+                    if (indexNivel < indexSupervisor) {
+                        mostrar = false;
+                    }
+                }
+                
+                modulo.style.display = mostrar ? '' : 'none';
+            });
+        });
+    </script>
     <script src="js/core/portal.js"></script>
 </body>
 
