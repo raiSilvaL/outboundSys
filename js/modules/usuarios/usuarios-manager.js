@@ -22,9 +22,18 @@ class UsuariosManager {
         this.renderizarPaginacao();
     }
 
+    mostrarLoadingSpinner(mostrar) {
+        const spinner = document.getElementById('loading-spinner');
+        if (spinner) {
+            spinner.style.display = mostrar ? 'flex' : 'none';
+        }
+    }
+
     async carregarUsuariosDoAPI() {
         try {
             this.carregandoDados = true;
+            this.mostrarLoadingSpinner(true);
+            
             const response = await fetch(`${this.apiUrl}?aba=Login`);
 
             if (!response.ok) {
@@ -46,10 +55,12 @@ class UsuariosManager {
 
             this.usuariosFiltrados = [...this.usuarios];
             this.carregandoDados = false;
+            this.mostrarLoadingSpinner(false);
             return this.usuarios;
         } catch (erro) {
             console.error('Erro ao carregar usuários da API:', erro);
             this.carregandoDados = false;
+            this.mostrarLoadingSpinner(false);
             this.exibirMensagem('error', 'Erro ao carregar dados da API. Verifique sua conexão.');
             return [];
         }

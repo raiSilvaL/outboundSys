@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const avatarElement = document.getElementById('sidebar-user-avatar');
         if (avatarElement) {
             avatarElement.textContent = iniciais;
+            
+            avatarElement.style.background = 'linear-gradient(135deg, #38bdf8 0%, #8b5cf6 100%)';
         }
 
         // Atualizar nome

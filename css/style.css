@@ -1772,7 +1772,7 @@ body {
     width: 40px;
     height: 40px;
     background: linear-gradient(135deg, #38bdf8 0%, #8b5cf6 100%);
-    border-radius: 6px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1780,6 +1780,8 @@ body {
     font-weight: 700;
     font-size: 0.8rem;
     flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+    transition: all 0.3s ease;
 }
 
 .user-info {
@@ -1831,6 +1833,9 @@ body {
 .sidebar.collapsed .user-card {
     flex-direction: column;
     padding: 0.5rem;
+    background: transparent;
+    border: none;
+    justify-content: center;
 }
 
 .sidebar.collapsed .user-info {
@@ -1838,7 +1843,5 @@ body {
 }
 
 .sidebar.collapsed .user-logout {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
+    display: none;
 }
