@@ -1555,7 +1555,7 @@ body {
 
 .modules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 400px));
+    grid-template-columns: repeat(3, 1fr);
     justify-content: center;
     gap: 2rem;
     width: 100%;
@@ -1747,9 +1747,7 @@ body {
 
 /* Status Feedback - Pendente */
 .status-pending {
-    background: rgba(100, 116, 139, 0.2);
     color: #94a3b8;
-    border: 1px solid rgba(100, 116, 139, 0.4);
 }
 
 
