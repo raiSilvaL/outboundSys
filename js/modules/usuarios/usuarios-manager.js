@@ -5,6 +5,21 @@
 
 class UsuariosManager {
     constructor() {
+        // Validar permissao antes de inicializar
+        if (!auth || !auth.estaAutenticado()) {
+            console.error('Usuario nao autenticado');
+            alert('Voce precisa estar autenticado para acessar o gerenciador de usuarios.');
+            window.location.href = '../index.html';
+            return;
+        }
+
+        if (!adminGuard || !adminGuard.ehAdministrador()) {
+            console.error('Usuario sem permissao para gerenciar usuarios');
+            alert('Voce nao tem permissao para acessar o gerenciador de usuarios.');
+            window.location.href = '../index.html';
+            return;
+        }
+
         this.apiUrl = 'https://script.google.com/macros/s/AKfycbyHe8Dj_CIBXuCB0EH-5C5r4WGv3K2klbs2JkoDdv8G31XGcCofqMRpZyJGCC9BYJ7K/exec';
         this.usuarios = [];
         this.usuarioEmEdicao = null;
