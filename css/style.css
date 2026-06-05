@@ -50,6 +50,21 @@ body {
     visibility: hidden;
 }
 
+/* Estratégia Bloqueio por Padrão (Default-Deny) */
+.auth-pending #main-content,
+.auth-pending .dashboard-wrapper,
+.auth-pending .sidebar,
+.auth-pending .main-wrapper,
+.auth-pending .hub-container {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+.hidden {
+    display: none !important;
+}
+
 .text-wrapper {
     text-align: center;
 }

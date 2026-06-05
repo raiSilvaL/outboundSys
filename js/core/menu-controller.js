@@ -5,22 +5,12 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // A validação principal agora é feita pelo permission-guard.js o mais rápido possível.
+    // Este arquivo cuida apenas de ajustes finos na UI após a validação.
+    
     setTimeout(() => {
-        if (!auth || !auth.estaAutenticado()) {
-            return;
-        }
-
+        if (!auth || !auth.estaAutenticado()) return;
         const usuario = auth.obterUsuarioAtual();
-        if (!usuario) return;
-
-        // Usar o novo sistema de proteção de permissões
-        if (permissionGuard) {
-            // Validar acesso à página atual
-            permissionGuard.validarAcessoPagina();
-            
-            // Filtrar elementos por permissão
-            permissionGuard.filtrarElementosPorPermissao();
-        }
 
         // Mostrar telas em desenvolvimento apenas para Supervisor+ (ou ADM)
         const futureSection = document.getElementById('future-telas-section');
@@ -32,5 +22,5 @@ document.addEventListener('DOMContentLoaded', () => {
                 futureSection.style.display = 'none';
             }
         }
-    }, 50);
+    }, 100);
 });

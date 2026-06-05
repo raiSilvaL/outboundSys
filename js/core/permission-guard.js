@@ -72,21 +72,33 @@ class PermissionGuard {
      */
     validarAcessoPagina() {
         if (!auth || !auth.estaAutenticado()) {
-            return; // Deixa o login handler cuidar
+            return false; 
         }
 
         const usuario = auth.obterUsuarioAtual();
         const paginaAtual = this.obterPaginaAtual();
 
         // Não validar a página de login
-        if (paginaAtual === 'login.html' || paginaAtual === 'index.html') {
-            return;
+        if (paginaAtual === 'login.html') {
+            document.body.classList.remove('auth-pending');
+            return true;
+        }
+
+        // Se estiver no index, apenas remove o bloqueio
+        if (paginaAtual === 'index.html' || paginaAtual === '') {
+            document.body.classList.remove('auth-pending');
+            return true;
         }
 
         if (!this.temPermissaoPagina(usuario.nivel, paginaAtual)) {
             console.warn(`Acesso negado à página ${paginaAtual} para usuário ${usuario.nivel}`);
             this.redirecionar('../index.html');
+            return false;
         }
+
+        // Se passou em todas as validações, remove a classe de bloqueio
+        document.body.classList.remove('auth-pending');
+        return true;
     }
 
     /**
@@ -187,12 +199,33 @@ class PermissionGuard {
 // Instância global do protetor de permissões
 const permissionGuard = new PermissionGuard();
 
-// Validar acesso à página atual quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        if (permissionGuard && auth && auth.estaAutenticado()) {
-            permissionGuard.validarAcessoPagina();
-            permissionGuard.filtrarElementosPorPermissao();
+// Validar acesso à página atual o mais rápido possível
+(function() {
+    const checkAccess = () => {
+        if (typeof auth !== 'undefined' && typeof permissionGuard !== 'undefined') {
+            if (auth.estaAutenticado()) {
+                const hasAccess = permissionGuard.validarAcessoPagina();
+                if (hasAccess) {
+                    permissionGuard.filtrarElementosPorPermissao();
+                }
+            } else {
+                // Se não estiver autenticado e não for a página de login, redireciona
+                const pagina = permissionGuard.obterPaginaAtual();
+                if (pagina !== 'login.html') {
+                    window.location.href = pagina.includes('html/') ? 'login.html' : 'html/login.html';
+                } else {
+                    document.body.classList.remove('auth-pending');
+                }
+            }
+        } else {
+            // Tenta novamente em 10ms se os objetos ainda não carregaram
+            setTimeout(checkAccess, 10);
         }
-    }, 50);
-});
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkAccess);
+    } else {
+        checkAccess();
+    }
+})();
