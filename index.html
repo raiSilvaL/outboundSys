@@ -30,7 +30,7 @@
 
             <div class="modules-grid">
                 <!-- Módulo: Auditoria HSE -->
-                <a href="html/auditHse.html" class="module-card">
+                <a href="html/auditHse.html" class="module-card" data-module="audit-dashboard">
                     <div class="module-icon">
                         <i class="fas fa-clipboard-check"></i>
                     </div>
@@ -44,7 +44,7 @@
                 </a>
 
                 <!-- Módulo Futuro: CPT -->
-                <div class="module-card disabled">
+                <div class="module-card disabled" data-module="future">
                     <span class="badge-soon">Em breve</span>
                     <div class="module-icon">
                         <i class="fas fa-project-diagram"></i>
@@ -59,7 +59,7 @@
                 </div>
 
                 <!-- Módulo Futuro: Backlog -->
-                <div class="module-card disabled">
+                <div class="module-card disabled" data-module="future">
                     <span class="badge-soon">Em breve</span>
                     <div class="module-icon">
                         <i class="fas fa-tasks"></i>
@@ -74,7 +74,7 @@
                 </div>
 
                 <!-- Módulo Futuro: WTD -->
-                <div class="module-card disabled">
+                <div class="module-card disabled" data-module="future">
                     <span class="badge-soon">Em breve</span>
                     <div class="module-icon">
                         <i class="fas fa-calendar-week"></i>
@@ -89,7 +89,7 @@
                 </div>
 
                 <!-- Módulo: Produtividade -->
-                <a href="html/produtividade.html" class="module-card">
+                <a href="html/produtividade.html" class="module-card" data-module="produtividade">
                     <div class="module-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
@@ -103,7 +103,7 @@
                 </a>
 
                 <!-- Módulo: Feedback de Faltas -->
-                <a href="html/feedbackFaltas.html" class="module-card">
+                <a href="html/feedbackFaltas.html" class="module-card" data-module="feedback-faltas">
                     <div class="module-icon">
                         <i class="fas fa-comments"></i>
                     </div>
@@ -150,11 +150,10 @@
 
             const usuario = auth.obterUsuarioAtual();
             
-            const gradienteUsuario = 'linear-gradient(135deg, #38bdf8 0%, #8b5cf6 100%)';
-
             // Adicionar indicador de usuário no canto superior direito
             const header = document.querySelector('.hub-header');
             if (header) {
+                const gradienteUsuario = permissions.obterCorNivel(usuario.nivel);
                 const userWrapper = document.createElement('div');
                 userWrapper.id = 'user-dropdown-wrapper';
                 userWrapper.style.cssText = 'position: absolute; top: 2rem; right: 2rem; z-index: 1000;';
@@ -201,42 +200,19 @@
                 });
             }
 
-            // Filtrar módulos por permissão
+            // Filtrar módulos por permissão usando o PermissionSystem
             const modulos = document.querySelectorAll('.module-card');
-            const nivelHierarquia = ['PS', 'PA', 'Coordenador', 'Supervisor', 'Gerente', 'ADM'];
-            const indexNivel = nivelHierarquia.indexOf(usuario.nivel);
             
             modulos.forEach(modulo => {
+                const telaId = modulo.getAttribute('data-module');
                 let mostrar = true;
-                
-                // Verificar permissões de acesso
-                if (modulo.href) {
-                    const href = modulo.href;
-                    
-                    // Auditoria HSE - apenas Supervisor+
-                    if (href.toLowerCase().includes('audithse')) {
-                        mostrar = indexNivel >= nivelHierarquia.indexOf('Supervisor');
-                    }
-                    // Feedback de Faltas - apenas Coordenador+
-                    else if (href.toLowerCase().includes('feedbackfaltas')) {
-                        mostrar = indexNivel >= nivelHierarquia.indexOf('Coordenador');
-                    }
-                    // Gestão de Usuários - apenas Gerente+
-                    else if (href.toLowerCase().includes('gestaousuarios')) {
-                        mostrar = indexNivel >= nivelHierarquia.indexOf('Gerente');
-                    }
-                    // Produtividade - todos
-                    else if (href.toLowerCase().includes('produtividade')) {
-                        mostrar = true;
-                    }
-                }
-                
-                // Telas em desenvolvimento - apenas Supervisor+
-                if (modulo.classList.contains('disabled')) {
-                    const indexSupervisor = nivelHierarquia.indexOf('Supervisor');
-                    if (indexNivel < indexSupervisor) {
-                        mostrar = false;
-                    }
+
+                if (telaId === 'future') {
+                    // Telas em desenvolvimento - apenas Supervisor+
+                    mostrar = permissions.temNivelSuficiente(usuario.nivel, 'Supervisor');
+                } else if (telaId) {
+                    // Usar o sistema de permissões centralizado
+                    mostrar = permissions.temPermissao(usuario.nivel, telaId);
                 }
                 
                 modulo.style.display = mostrar ? '' : 'none';
