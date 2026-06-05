@@ -1,18 +1,25 @@
 /**
- * Controlador de Menu Lateral - Versão Robusta
- * Filtra itens do menu baseado nas permissões do usuário e monitora mudanças no DOM
+ * Controlador de Menu Lateral - Versão "Whitelist" (Segurança Máxima)
+ * Esconde todos os módulos por padrão e exibe apenas aqueles que o usuário tem permissão.
  */
 
 const MenuController = {
     nivelHierarquia: ['PS', 'PA', 'Coordenador', 'Supervisor', 'Gerente', 'ADM'],
     
-    getFilters: function() {
-        return {
-            'auditHse.html': { minIndex: this.nivelHierarquia.indexOf('Supervisor'), keywords: ['audithse', 'audit-parent', 'audit-submenu'] },
-            'feedbackFaltas.html': { minIndex: this.nivelHierarquia.indexOf('Coordenador'), keywords: ['feedbackfaltas', 'feedback-main'] },
-            'gestaoUsuarios.html': { minIndex: this.nivelHierarquia.indexOf('Gerente'), keywords: ['gestaousuarios'] },
-            'produtividade.html': { minIndex: this.nivelHierarquia.indexOf('PS'), keywords: ['produtividade'] }
-        };
+    // Mapeamento de permissões (replicando a lógica da index)
+    permissoes: {
+        'auditHse.html': 'Supervisor',
+        'feedbackFaltas.html': 'Coordenador',
+        'gestaoUsuarios.html': 'Gerente',
+        'produtividade.html': 'PS' // Todos têm acesso
+    },
+
+    // Mapeamento de elementos por módulo
+    elementosModulo: {
+        'auditHse.html': ['.menu-item[href*="auditHse.html"]', '.menu-group:has(a[href*="auditHse.html"])', '#audit-parent', '#audit-submenu', '.menu-item:has(.fa-clipboard-check)'],
+        'feedbackFaltas.html': ['.menu-item[href*="feedbackFaltas.html"]', '.menu-item[data-screen="feedback-main"]', '.menu-item:has(.fa-comments)'],
+        'gestaoUsuarios.html': ['.menu-item[href*="gestaoUsuarios.html"]', '.menu-item:has(.fa-users-cog)'],
+        'produtividade.html': ['.menu-item[href*="produtividade.html"]', '.menu-item:has(.fa-chart-line)']
     },
 
     aplicarFiltro: function() {
@@ -21,88 +28,113 @@ const MenuController = {
         const usuario = auth.obterUsuarioAtual();
         if (!usuario) return;
 
-        const indexNivel = this.nivelHierarquia.indexOf(usuario.nivel);
-        const filters = this.getFilters();
+        const nivelUsuario = usuario.nivel;
+        const indexNivelUsuario = this.nivelHierarquia.indexOf(nivelUsuario);
 
-        // 1. Telas em desenvolvimento
+        // 1. Lidar com a seção de futuras telas
         const futureSection = document.getElementById('future-telas-section');
         if (futureSection) {
-            const display = indexNivel >= this.nivelHierarquia.indexOf('Supervisor') ? 'block' : 'none';
-            futureSection.style.setProperty('display', display, 'important');
+            const nivelNecessario = 'Supervisor';
+            const indexNecessario = this.nivelHierarquia.indexOf(nivelNecessario);
+            futureSection.style.setProperty('display', indexNivelUsuario >= indexNecessario ? 'block' : 'none', 'important');
         }
 
-        // 2. Módulos
-        Object.entries(filters).forEach(([fileName, config]) => {
-            if (indexNivel < config.minIndex) {
-                // Esconder por href
-                document.querySelectorAll(`a[href*="${fileName}"]`).forEach(link => {
-                    const container = link.closest('.menu-group') || link.closest('.menu-item') || link;
-                    container.style.setProperty('display', 'none', 'important');
-                });
-
-                // Esconder por keywords
-                config.keywords.forEach(keyword => {
-                    // Por ID
-                    const elById = document.getElementById(keyword);
-                    if (elById) {
-                        const container = elById.closest('.menu-group') || elById.closest('.menu-item') || elById;
-                        container.style.setProperty('display', 'none', 'important');
+        // 2. Filtrar módulos
+        Object.entries(this.permissoes).forEach(([pagina, nivelMinimo]) => {
+            const indexMinimo = this.nivelHierarquia.indexOf(nivelMinimo);
+            const temPermissao = indexNivelUsuario >= indexMinimo;
+            
+            // Buscar todos os elementos relacionados a este módulo
+            const seletores = this.elementosModulo[pagina] || [];
+            seletores.forEach(seletor => {
+                document.querySelectorAll(seletor).forEach(el => {
+                    if (temPermissao) {
+                        // Se tem permissão, garante que o display seja o original (flex/block)
+                        // mas não remove o !important se ele não estiver atrapalhando.
+                        // O padrão da sidebar é flex para menu-item.
+                        const displayPadrao = el.classList.contains('menu-item') ? 'flex' : 'block';
+                        el.style.setProperty('display', displayPadrao, 'important');
+                    } else {
+                        // Se não tem permissão, esconde com prioridade máxima
+                        el.style.setProperty('display', 'none', 'important');
                     }
+                });
+            });
 
-                    // Por data-screen
-                    document.querySelectorAll(`[data-screen*="${keyword}"]`).forEach(el => {
-                        const container = el.closest('.menu-group') || el.closest('.menu-item') || el;
-                        container.style.setProperty('display', 'none', 'important');
-                    });
-
-                    // Por texto
-                    document.querySelectorAll('.menu-text').forEach(textEl => {
-                        const text = textEl.textContent.toLowerCase();
-                        const search = keyword.toLowerCase().replace('-', ' ');
-                        if (text.includes(search)) {
-                            const container = textEl.closest('.menu-group') || textEl.closest('.menu-item');
-                            if (container) container.style.setProperty('display', 'none', 'important');
-                        }
-                    });
+            // Fallback: Esconder por texto caso os seletores falhem
+            if (!temPermissao) {
+                const textoBusca = pagina.replace('.html', '').toLowerCase();
+                document.querySelectorAll('.menu-text').forEach(span => {
+                    const textoMenu = span.textContent.toLowerCase();
+                    // Mapeamento de nomes amigáveis para busca por texto
+                    const nomesMap = {
+                        'audithse': 'auditoria hse',
+                        'feedbackfaltas': 'feedback de faltas',
+                        'gestaousuarios': 'gestão de usuários',
+                        'produtividade': 'produtividade'
+                    };
+                    
+                    if (textoMenu.includes(nomesMap[textoBusca] || textoBusca)) {
+                        const container = span.closest('.menu-group') || span.closest('.menu-item');
+                        if (container) container.style.setProperty('display', 'none', 'important');
+                    }
                 });
             }
         });
 
-        this.verificarAcessoPagina(indexNivel, filters);
+        this.verificarAcessoPagina(indexNivelUsuario);
     },
 
-    verificarAcessoPagina: function(indexNivel, filters) {
+    verificarAcessoPagina: function(indexNivelUsuario) {
         const path = window.location.pathname;
         const paginaAtual = path.split('/').pop() || 'index.html';
         const paginaNormalizada = paginaAtual.includes('.') ? paginaAtual : paginaAtual + '.html';
         
-        for (const [file, config] of Object.entries(filters)) {
-            if (paginaNormalizada.includes(file) && indexNivel < config.minIndex) {
-                const prefix = path.includes('/html/') ? '../' : '';
-                window.location.href = prefix + 'index.html';
+        for (const [file, nivelMinimo] of Object.entries(this.permissoes)) {
+            if (paginaNormalizada.includes(file)) {
+                const indexMinimo = this.nivelHierarquia.indexOf(nivelMinimo);
+                if (indexNivelUsuario < indexMinimo) {
+                    const prefix = path.includes('/html/') ? '../' : '';
+                    window.location.href = prefix + 'index.html';
+                }
                 break;
             }
         }
     },
 
     init: function() {
-        // Execução imediata
-        this.aplicarFiltro();
+        // Estilo CSS injetado para esconder os itens problemáticos imediatamente se possível
+        const style = document.createElement('style');
+        style.innerHTML = `
+            /* Esconde itens de menu que sabemos que precisam de permissão alta por padrão */
+            /* Eles serão re-exibidos via JS se o usuário tiver permissão */
+            .menu-item[href*="auditHse.html"], 
+            .menu-item[href*="gestaoUsuarios.html"],
+            .menu-item[href*="feedbackFaltas.html"],
+            .menu-group:has(a[href*="auditHse.html"]),
+            #audit-parent { 
+                display: none !important; 
+            }
+        `;
+        document.head.appendChild(style);
 
-        // Execução no carregamento
-        window.addEventListener('load', () => this.aplicarFiltro());
-        document.addEventListener('DOMContentLoaded', () => this.aplicarFiltro());
+        const executar = () => this.aplicarFiltro();
 
-        // MutationObserver para lidar com renderizações dinâmicas
-        const observer = new MutationObserver(() => this.aplicarFiltro());
+        // Ciclo de execução para cobrir todos os estados de carregamento
+        executar();
+        document.addEventListener('DOMContentLoaded', executar);
+        window.addEventListener('load', executar);
+        
+        // Observer para mudanças dinâmicas
+        const observer = new MutationObserver(executar);
         observer.observe(document.body, { childList: true, subtree: true });
 
-        // Backup com Interval (último recurso)
-        let count = 0;
+        // Intervalo de segurança curto nos primeiros segundos
+        let checks = 0;
         const interval = setInterval(() => {
-            this.aplicarFiltro();
-            if (++count > 10) clearInterval(interval);
-        }, 500);
+            executar();
+            if (++checks > 20) clearInterval(interval);
+        }, 200);
     }
 };
 
