@@ -51,7 +51,7 @@ class AuthSystem {
                 nome: u.Nome || u.nome || '',
                 email: u.Email || u.email || '',
                 senha: u.Senha || u.senha || '',
-                nivel: u.Nivel || u.nivel || '',
+                nivel: (u.Nivel || u.nivel || '').trim(),
                 funcao: u.Funcao || u.funcao || '',
                 turno: u.Turno || u.turno || ''
             }));
@@ -141,10 +141,14 @@ class AuthSystem {
         localStorage.removeItem(this.storageKey);
         this.usuarioAtual = null;
         
-        const currentPath = window.location.pathname;
-        if (currentPath.includes('/html/')) {
+        // Redirecionamento robusto para a página de login
+        const pathParts = window.location.pathname.split('/');
+        const isInHtmlFolder = pathParts.includes('html');
+        
+        if (isInHtmlFolder) {
             window.location.href = 'login.html';
         } else {
+            // Se estiver na raiz ou em outro lugar, tenta o caminho padrão
             window.location.href = 'html/login.html';
         }
     }

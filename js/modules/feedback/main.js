@@ -3,9 +3,8 @@
  * Responsável pela gestão da interface e integração com a API de Registro de Faltas
  */
 
-// Nova URL da API com suporte a CRUD
-const API_BASE_URL = "https://script.google.com/macros/s/AKfycbxOsYW5VrGoIgd4h5pP8M2oRQkyTYLfF-TjCGEO6krsH3bHDcqCEPu29W1n-Bh7B7u9lg/exec";
-const API_URL = `${API_BASE_URL}?aba=Registro%20de%20Faltas`;
+const API_URL = "https://script.google.com/macros/s/AKfycby3Jm4vjjg-ArnnbwQui_LiBOH-nqiATyL47X-xel5PR4JJBHrpKj9sCoCQl3UsR9AQnQ/exec?aba=Registro%20de%20Faltas";
+const BASE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFUCCCf_WBbb1k9hMHQWYmIZaiutECp2PvGfgm32NtMTepBwgwy1OAzdB3c1yuXI-E4Q/exec";
 
 // Estado global
 let allFeedbackData = [];
@@ -17,6 +16,7 @@ let feedbackFilters = {
     departamento: new Set(),
     empregador: new Set(),
     turno: new Set(),
+    coordenador: new Set(),
     motivo: new Set(),
     status: new Set()
 };
@@ -44,7 +44,7 @@ window.addEventListener('introFinished', () => {
     setInterval(updateDateTime, 1000);
 
     initializeSidebar();
-    // initializeMenus(); // Removido se não houver submenus específicos
+    initializeMenus();
 
     initializeScreens((screenName) => {
         console.log('Mudou para tela:', screenName);
@@ -52,6 +52,7 @@ window.addEventListener('introFinished', () => {
 
     loadFeedbackData();
     setupEventListeners();
+    initializeExportButtons();
     setupCarouselControls();
 });
 
@@ -70,7 +71,7 @@ async function loadFeedbackData() {
     const spinner = document.getElementById('loading-spinner');
     if (!tableBody) return;
 
-    // Mostrar spinner (se existir)
+    // Mostrar spinner
     if (spinner) spinner.style.display = 'flex';
 
     try {
@@ -83,6 +84,7 @@ async function loadFeedbackData() {
             const departamento = (item["DEPARTAMENTO"] || item["Departamento"] || '').toString().trim().toUpperCase();
             return departamentosPermitidos.includes(departamento);
         }).map(item => {
+            // Normalização das chaves para evitar erros de case-sensitive ou espaços
             const normalizedItem = {
                 dataFalta: item["DATA DA FALTA"] || item["Data da Falta"] || '',
                 nome: (item["NOME"] || item["Nome"] || '').toString().trim(),
@@ -95,9 +97,11 @@ async function loadFeedbackData() {
                 motivo: (item["Motivo da falta"] || item["MOTIVO DA FALTA"] || item["Motivo"] || '').toString().trim(),
                 dataFeedback: item["Data do feedback"] || item["DATA DO FEEDBACK"] || '',
                 statusOriginal: (item["Status"] || '').toString().trim(),
-                observacao: (item["Observação"] || item["Observacao"] || '').toString().trim(),
+                observacao: (item["AB"] || item["Observacao"] || item["Observação"] || '').toString().trim(),
+                quemRespondeu: (item["AC"] || item["Quem respondeu"] || item["Quem Respondeu"] || '').toString().trim()
             };
 
+            // Calcular status
             const hasFeedbackDate = normalizedItem.dataFeedback && normalizedItem.dataFeedback !== "" && normalizedItem.dataFeedback !== "-";
             normalizedItem.statusCalculado = hasFeedbackDate ? 'Concluído' : 'Pendente';
 
@@ -110,16 +114,18 @@ async function loadFeedbackData() {
         renderFeedbackChart(filteredFeedbackData);
         renderMotivosChart(filteredFeedbackData);
 
-        populateAllMultiSelects(allFeedbackData);
+        // Inicializar filtros após carregar dados
         initializeHeaderFilters();
 
+        // Ocultar spinner
         if (spinner) spinner.style.display = 'none';
 
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
         if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="12" style="text-align: center; color: #ef4444;">Erro ao carregar dados. Verifique a conexão.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #ef4444;">Erro ao carregar dados. Verifique a conexão.</td></tr>';
         }
+        // Ocultar spinner em caso de erro
         if (spinner) spinner.style.display = 'none';
     }
 }
@@ -133,7 +139,7 @@ function renderFeedbackTable(data) {
         return;
     }
 
-    tableBody.innerHTML = data.map((item, index) => {
+    tableBody.innerHTML = data.map(item => {
         const dataFaltaStr = item.dataFalta ? new Date(item.dataFalta).toLocaleDateString('pt-BR') : '-';
         const dataFeedbackStr = item.dataFeedback ? new Date(item.dataFeedback).toLocaleDateString('pt-BR') : '-';
         const statusClass = item.statusCalculado === 'Concluído' ? 'status-completed' : 'status-pending';
@@ -141,17 +147,13 @@ function renderFeedbackTable(data) {
         return `
             <tr>
                 <td>${dataFaltaStr}</td>
-                <td>
-                    <button class="btn-action-feedback" onclick="openFeedbackModal(${index})">
-                        <i class="fas fa-edit"></i> Feedback
-                    </button>
-                </td>
                 <td>${item.nome || '-'}</td>
                 <td>${item.cpf || '-'}</td>
                 <td>${item.setor || '-'}</td>
                 <td>${item.departamento || '-'}</td>
                 <td>${item.empregador || '-'}</td>
                 <td>${item.turno || '-'}</td>
+                <td>${item.coordenador || '-'}</td>
                 <td>${dataFeedbackStr}</td>
                 <td>${item.motivo || '-'}</td>
                 <td>${item.observacao || '-'}</td>
@@ -159,96 +161,6 @@ function renderFeedbackTable(data) {
             </tr>
         `;
     }).join('');
-}
-
-// Funções do Modal
-window.openFeedbackModal = function(index) {
-    const item = filteredFeedbackData[index];
-    if (!item) return;
-
-    document.getElementById('modal-nome').value = item.nome;
-    document.getElementById('modal-cpf').value = item.cpf;
-    
-    // Formatar data para exibição amigável
-    const dataFalta = item.dataFalta ? new Date(item.dataFalta).toLocaleDateString('pt-BR') : '';
-    document.getElementById('modal-data-falta').value = dataFalta;
-    
-    document.getElementById('modal-motivo').value = item.motivo || '';
-    document.getElementById('modal-observacao').value = item.observacao || '';
-
-    document.getElementById('feedback-modal').classList.add('active');
-};
-
-function closeFeedbackModal() {
-    document.getElementById('feedback-modal').classList.remove('active');
-    document.getElementById('feedback-form-native').reset();
-    
-    // Resetar container de "Outros"
-    const outroMotivoContainer = document.getElementById('outro-motivo-container');
-    if (outroMotivoContainer) outroMotivoContainer.style.display = 'none';
-}
-
-async function handleFeedbackSubmit(e) {
-    e.preventDefault();
-    
-    const submitBtn = document.getElementById('submit-feedback-btn');
-    const originalText = submitBtn.innerHTML;
-    
-    const cpf = document.getElementById('modal-cpf').value;
-    const dataFalta = document.getElementById('modal-data-falta').value;
-    let motivo = document.getElementById('modal-motivo').value;
-    const outroMotivo = document.getElementById('modal-outro-motivo').value;
-    
-    if (motivo === 'Outros' && outroMotivo) {
-        motivo = `Outros: ${outroMotivo}`;
-    }
-
-    const observacao = document.getElementById('modal-observacao').value;
-    const dataFeedback = new Date().toLocaleDateString('pt-BR');
-
-    // Desabilitar botão e mostrar loading
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-
-    try {
-        const payload = {
-            cpf: cpf,
-            dataFalta: dataFalta,
-            motivo: motivo,
-            observacao: observacao,
-            dataFeedback: dataFeedback
-        };
-
-        const response = await fetch(API_BASE_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            cache: 'no-cache',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        closeFeedbackModal();
-        
-        // Mostrar overlay de atualização
-        const updateOverlay = document.getElementById('update-overlay');
-        if (updateOverlay) updateOverlay.style.display = 'flex';
-        
-        // Recarregar dados após um pequeno delay para o Apps Script processar
-        setTimeout(async () => {
-            await loadFeedbackData();
-            if (updateOverlay) updateOverlay.style.display = 'none';
-            alert('Feedback enviado e dados atualizados com sucesso!');
-        }, 3000);
-
-    } catch (error) {
-        console.error('Erro ao enviar feedback:', error);
-        alert('Erro ao enviar feedback. Tente novamente.');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-    }
 }
 
 function updateStats(data) {
@@ -266,33 +178,10 @@ function updateStats(data) {
 }
 
 function setupEventListeners() {
-    // Modal events
-    document.getElementById('close-modal-btn').onclick = closeFeedbackModal;
-    document.getElementById('cancel-modal-btn').onclick = closeFeedbackModal;
-    document.getElementById('feedback-form-native').onsubmit = handleFeedbackSubmit;
-
-    // Lógica para o campo "Outros" no motivo
-    const motivoSelect = document.getElementById('modal-motivo');
-    const outroMotivoContainer = document.getElementById('outro-motivo-container');
-    const outroMotivoInput = document.getElementById('modal-outro-motivo');
-
-    if (motivoSelect && outroMotivoContainer) {
-        motivoSelect.addEventListener('change', (e) => {
-            if (e.target.value === 'Outros') {
-                outroMotivoContainer.style.display = 'block';
-                outroMotivoInput.required = true;
-            } else {
-                outroMotivoContainer.style.display = 'none';
-                outroMotivoInput.required = false;
-            }
-        });
+    const openFormsBtn = document.getElementById('open-forms-btn');
+    if (openFormsBtn) {
+        openFormsBtn.addEventListener('click', openFeedbackModal);
     }
-
-    // Fechar modal ao clicar fora
-    window.onclick = (event) => {
-        const modal = document.getElementById('feedback-modal');
-        if (event.target == modal) closeFeedbackModal();
-    };
 
     // Filtros de período
     const applyBtn = document.getElementById('apply-feedback-filters');
@@ -319,16 +208,20 @@ function setupEventListeners() {
 
 function applyFilters() {
     filteredFeedbackData = allFeedbackData.filter(item => {
+        // Filtros de texto
         const nomeMatch = item.nome.toLowerCase().includes(feedbackFilters.nome.toLowerCase());
         const cpfMatch = item.cpf.includes(feedbackFilters.cpf);
-        
+
+        // Filtros de múltipla seleção
         const setorMatch = feedbackFilters.setor.size === 0 || feedbackFilters.setor.has(item.setor);
-        const deptoMatch = feedbackFilters.departamento.size === 0 || feedbackFilters.departamento.has(item.departamento);
-        const empMatch = feedbackFilters.empregador.size === 0 || feedbackFilters.empregador.has(item.empregador);
+        const departamentoMatch = feedbackFilters.departamento.size === 0 || feedbackFilters.departamento.has(item.departamento);
+        const empregadorMatch = feedbackFilters.empregador.size === 0 || feedbackFilters.empregador.has(item.empregador);
         const turnoMatch = feedbackFilters.turno.size === 0 || feedbackFilters.turno.has(item.turno);
+        const coordenadorMatch = feedbackFilters.coordenador.size === 0 || feedbackFilters.coordenador.has(item.coordenador);
         const motivoMatch = feedbackFilters.motivo.size === 0 || feedbackFilters.motivo.has(item.motivo);
         const statusMatch = feedbackFilters.status.size === 0 || feedbackFilters.status.has(item.statusCalculado);
 
+        // Filtro de período
         let periodMatch = true;
         if (feedbackPeriodFilters.startDate || feedbackPeriodFilters.endDate) {
             const itemDate = new Date(item.dataFalta);
@@ -336,7 +229,7 @@ function applyFilters() {
             if (feedbackPeriodFilters.endDate && itemDate > feedbackPeriodFilters.endDate) periodMatch = false;
         }
 
-        return nomeMatch && cpfMatch && setorMatch && deptoMatch && empMatch && turnoMatch && motivoMatch && statusMatch && periodMatch;
+        return nomeMatch && cpfMatch && setorMatch && departamentoMatch && empregadorMatch && turnoMatch && coordenadorMatch && motivoMatch && statusMatch && periodMatch;
     });
 
     renderFeedbackTable(filteredFeedbackData);
@@ -354,7 +247,6 @@ function updateDateTime() {
 }
 
 function initializeHeaderFilters() {
-    // Filtros de texto (Nome e CPF)
     const textFilters = document.querySelectorAll('.col-excel-filter-text');
     textFilters.forEach(input => {
         const column = input.dataset.column;
@@ -364,9 +256,18 @@ function initializeHeaderFilters() {
         });
     });
 
-    // Filtros Multi-select
-    ['setor', 'departamento', 'empregador', 'turno', 'motivo', 'status'].forEach(col => {
+    // Inicializar multiselects
+    const columns = ['setor', 'departamento', 'empregador', 'turno', 'coordenador', 'motivo', 'status'];
+    columns.forEach(col => {
         initMultiSelect(col);
+
+        // Popular opções a partir dos dados normalizados
+        const values = new Set(allFeedbackData.map(item => {
+            if (col === 'status') return item.statusCalculado;
+            return item[col];
+        }));
+
+        populateMultiSelectOptions(col, values);
     });
 }
 
@@ -379,10 +280,11 @@ function initMultiSelect(column) {
     const searchInput = wrapper.querySelector('.multi-select-search');
     const clearBtn = wrapper.querySelector('.multi-select-clear');
 
-    // Prevenir envio de formulário se o botão for clicado (embora esteja em uma tabela)
-    btn.type = 'button';
+    // Remover listeners antigos se houver (para evitar duplicidade ao recarregar)
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
 
-    btn.addEventListener('click', (e) => {
+    newBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isOpen = dropdown.classList.contains('open');
         document.querySelectorAll('.multi-select-dropdown.open').forEach(d => {
@@ -395,18 +297,22 @@ function initMultiSelect(column) {
 
         if (!isOpen) {
             dropdown.classList.add('open');
-            btn.classList.add('open');
-            if (searchInput) searchInput.focus();
+            newBtn.classList.add('open');
+            if (searchInput) {
+                searchInput.value = '';
+                wrapper.querySelectorAll('.multi-select-option').forEach(opt => opt.classList.remove('hidden'));
+                searchInput.focus();
+            }
         } else {
             dropdown.classList.remove('open');
-            btn.classList.remove('open');
+            newBtn.classList.remove('open');
         }
     });
 
     document.addEventListener('click', (e) => {
         if (!wrapper.contains(e.target)) {
             dropdown.classList.remove('open');
-            btn.classList.remove('open');
+            newBtn.classList.remove('open');
         }
     });
 
@@ -463,52 +369,135 @@ function updateMultiSelectLabel(column) {
     }
 }
 
-function populateAllMultiSelects(data) {
-    const columns = {
-        setor: new Set(),
-        departamento: new Set(),
-        empregador: new Set(),
-        turno: new Set(),
-        motivo: new Set(),
-        status: new Set()
-    };
-
-    data.forEach(item => {
-        if (item.setor) columns.setor.add(item.setor);
-        if (item.departamento) columns.departamento.add(item.departamento);
-        if (item.empregador) columns.empregador.add(item.empregador);
-        if (item.turno) columns.turno.add(item.turno);
-        if (item.motivo) columns.motivo.add(item.motivo);
-        if (item.statusCalculado) columns.status.add(item.statusCalculado);
-    });
-
-    Object.entries(columns).forEach(([col, values]) => {
-        populateMultiSelectOptions(col, values);
-    });
-}
-
 function populateMultiSelectOptions(column, values) {
     const wrapper = document.querySelector(`.multi-select-wrapper[data-column="${column}"]`);
     if (!wrapper) return;
     const optionsContainer = wrapper.querySelector('.multi-select-options');
     if (!optionsContainer) return;
-    
-    // Limpar opções anteriores se necessário (opcional, dependendo se quer atualizar dinamicamente)
-    optionsContainer.innerHTML = '';
-    
-    [...values].sort().forEach(v => {
-        if (!v || v === '-') return;
-        const label = document.createElement('label');
-        label.className = 'multi-select-option';
-        const isChecked = feedbackFilters[column].has(v);
-        label.innerHTML = `
-            <input type="checkbox" value="${v}" ${isChecked ? 'checked' : ''}>
+
+    optionsContainer.innerHTML = [...values].filter(v => v && v !== '-' && v !== '').sort().map(v => `
+        <label class="multi-select-option">
+            <input type="checkbox" value="${v}" ${feedbackFilters[column].has(v) ? 'checked' : ''}>
             <span>${v}</span>
-        `;
-        optionsContainer.appendChild(label);
-    });
+        </label>
+    `).join('');
 }
 
+function initializeExportButtons() {
+    const excelBtn = document.getElementById('export-excel-btn');
+    const csvBtn = document.getElementById('export-csv-btn');
+
+    if (excelBtn) excelBtn.addEventListener('click', exportTableToExcel);
+    if (csvBtn) csvBtn.addEventListener('click', exportTableToCSV);
+}
+
+function getTableDataForExport() {
+    const tableBody = document.getElementById('feedback-table-body');
+    if (!tableBody) return [];
+
+    const data = [];
+    const rows = tableBody.querySelectorAll('tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const rowData = [];
+        cells.forEach(cell => rowData.push(cell.textContent.trim()));
+        if (rowData.length > 0) data.push(rowData);
+    });
+    return data;
+}
+
+function getTableHeaders() {
+    return ['Data Falta', 'Nome', 'CPF', 'Setor', 'Departamento', 'Empregador', 'Turno', 'Coordenador', 'Data Feedback', 'Motivo', 'Observacao', 'Status'];
+}
+
+function exportTableToExcel() {
+    try {
+        const headers = getTableHeaders();
+        const data = getTableDataForExport();
+        if (data.length === 0) { alert('Nenhum dado para exportar.'); return; }
+
+        const exportData = [headers, ...data];
+        const ws = XLSX.utils.aoa_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Feedback_Faltas");
+        XLSX.writeFile(wb, `Feedback_Faltas_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (e) {
+        console.error("Erro ao exportar Excel:", e);
+        alert("Erro ao exportar para Excel.");
+    }
+}
+
+function exportTableToCSV() {
+    try {
+        const headers = getTableHeaders();
+        const data = getTableDataForExport();
+        if (data.length === 0) { alert('Nenhum dado para exportar.'); return; }
+
+        const csvContent = [headers, ...data].map(e => e.join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Feedback_Faltas_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (e) {
+        console.error("Erro ao exportar CSV:", e);
+        alert("Erro ao exportar para CSV.");
+    }
+}
+
+/**
+ * Abre o modal de feedback com o formulário
+ */
+function openFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    const iframe = document.getElementById('feedback-iframe');
+
+    if (!modal || !iframe) return;
+
+    // Carregar o formulário no iframe
+    iframe.src = BASE_APPS_SCRIPT_URL;
+
+    // Abrir modal
+    modal.classList.add('active');
+}
+
+/**
+ * Fecha o modal de feedback
+ */
+function closeFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    const iframe = document.getElementById('feedback-iframe');
+    if (modal) {
+        modal.classList.remove('active');
+        console.log('Modal classe ativa removida');
+    }
+    // Limpar o iframe
+    if (iframe) {
+        iframe.src = 'about:blank';
+    }
+    // Recarregar dados da tabela apos fechar o modal
+    setTimeout(() => {
+        loadFeedbackData();
+    }, 500);
+}
+
+// Listener para fechar o modal ao clicar fora dele
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('feedback-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeFeedbackModal();
+            }
+        });
+    }
+});
+
+// Funções para o Carrossel (Gráfico vs. Tabela)
 function setupCarouselControls() {
     const prevBtn = document.getElementById('carousel-prev');
     const nextBtn = document.getElementById('carousel-next');
@@ -529,9 +518,11 @@ function setupCarouselControls() {
 }
 
 function updateCarouselView() {
+    // Atualizar título
     const titleEl = document.getElementById('carousel-title');
     if (titleEl) titleEl.textContent = carouselSlides[currentCarouselSlide];
 
+    // Mostrar/ocultar slides
     for (let i = 0; i < carouselSlides.length; i++) {
         const slide = document.getElementById(`carousel-slide-${i}`);
         if (slide) {
@@ -550,6 +541,7 @@ function renderFeedbackChart(data) {
     const ctx = document.getElementById('feedbackChart');
     if (!ctx) return;
 
+    // Agrupar dados por data
     const dataByDate = {};
     data.forEach(item => {
         const date = item.dataFalta ? new Date(item.dataFalta).toLocaleDateString('pt-BR') : 'N/A';
@@ -572,8 +564,12 @@ function renderFeedbackChart(data) {
     const justificadas = sortedDates.map(date => dataByDate[date].justificadas);
     const pendentes = sortedDates.map(date => dataByDate[date].pendentes);
 
-    if (feedbackChart) feedbackChart.destroy();
+    // Destruir gráfico anterior se existir
+    if (feedbackChart) {
+        feedbackChart.destroy();
+    }
 
+    // Criar novo gráfico de BARRAS
     feedbackChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -617,34 +613,48 @@ function renderFeedbackChart(data) {
     });
 }
 
+/**
+ * Renderiza gráfico de distribuição de motivos das faltas
+ */
 function renderMotivosChart(data) {
     const ctx = document.getElementById('motivosChart');
     if (!ctx) return;
 
+    // Contar ocorrências de cada motivo
     const motivosCont = {};
     data.forEach(item => {
         const motivo = item.motivo || "Sem informação";
         motivosCont[motivo] = (motivosCont[motivo] || 0) + 1;
     });
 
+    // Ordenar por frequência (decrescente)
     const motivosOrdenados = Object.entries(motivosCont)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
+        .slice(0, 10); // Top 10 motivos
 
     const labels = motivosOrdenados.map(item => item[0]);
     const counts = motivosOrdenados.map(item => item[1]);
 
+    // Cores vibrantes para o gráfico
     const colors = [
         'rgba(59, 130, 246, 0.8)',
         'rgba(34, 197, 94, 0.8)',
         'rgba(168, 85, 247, 0.8)',
         'rgba(249, 115, 22, 0.8)',
         'rgba(236, 72, 153, 0.8)',
-        'rgba(14, 165, 233, 0.8)'
+        'rgba(14, 165, 233, 0.8)',
+        'rgba(34, 197, 94, 0.8)',
+        'rgba(168, 85, 247, 0.8)',
+        'rgba(249, 115, 22, 0.8)',
+        'rgba(236, 72, 153, 0.8)'
     ];
 
-    if (motivosChart) motivosChart.destroy();
+    // Destruir gráfico anterior se existir
+    if (motivosChart) {
+        motivosChart.destroy();
+    }
 
+    // Criar novo gráfico de barras horizontal
     motivosChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -665,18 +675,58 @@ function renderMotivosChart(data) {
             plugins: {
                 legend: {
                     display: true,
-                    labels: { color: '#e0e7ff' }
+                    position: 'top',
+                    labels: {
+                        color: '#e0e7ff',
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        },
+                        padding: 15,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: '#38bdf8',
+                    bodyColor: '#e0e7ff',
+                    borderColor: 'rgba(56, 189, 248, 0.3)',
+                    borderWidth: 1,
+                    padding: 10,
+                    titleFont: {
+                        size: 12,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 11
+                    }
                 }
             },
             scales: {
                 x: {
                     beginAtZero: true,
-                    ticks: { color: '#94a3b8' },
-                    grid: { color: 'rgba(56, 189, 248, 0.1)' }
+                    ticks: {
+                        color: '#94a3b8',
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(56, 189, 248, 0.1)',
+                        drawBorder: false
+                    }
                 },
                 y: {
-                    ticks: { color: '#94a3b8' },
-                    grid: { display: false }
+                    ticks: {
+                        color: '#94a3b8',
+                        font: {
+                            size: 10
+                        }
+                    },
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    }
                 }
             }
         }

@@ -7,20 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Outbound System | Portal Central</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        /* Bloqueio crítico inline - impede renderização mesmo com delay de rede */
-        .auth-pending #main-content, 
-        .auth-pending .hub-container { 
-            display: none !important; 
-        }
-    </style>
     <!-- Fontes -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<body class="auth-pending">
+<body>
     <!-- Overlay da Animação de Entrada -->
     <div id="preloader">
         <div class="brand-container" id="logoText"></div>
@@ -148,9 +141,6 @@
     <script src="js/core/animation.js"></script>
     <script src="js/core/auth.js"></script>
     <script src="js/core/permissions.js"></script>
-    <script src="js/core/permission-guard.js"></script>
-    <script src="js/core/screen-guard.js"></script>
-    <script src="js/core/admin-guard.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (!auth || !auth.estaAutenticado()) {
@@ -224,19 +214,19 @@
                     const href = modulo.href;
                     
                     // Auditoria HSE - apenas Supervisor+
-                    if (href.includes('auditHse')) {
+                    if (href.toLowerCase().includes('audithse')) {
                         mostrar = indexNivel >= nivelHierarquia.indexOf('Supervisor');
                     }
                     // Feedback de Faltas - apenas Coordenador+
-                    else if (href.includes('feedbackFaltas')) {
+                    else if (href.toLowerCase().includes('feedbackfaltas')) {
                         mostrar = indexNivel >= nivelHierarquia.indexOf('Coordenador');
                     }
                     // Gestão de Usuários - apenas Gerente+
-                    else if (href.includes('gestaoUsuarios')) {
+                    else if (href.toLowerCase().includes('gestaousuarios')) {
                         mostrar = indexNivel >= nivelHierarquia.indexOf('Gerente');
                     }
                     // Produtividade - todos
-                    else if (href.includes('produtividade')) {
+                    else if (href.toLowerCase().includes('produtividade')) {
                         mostrar = true;
                     }
                 }

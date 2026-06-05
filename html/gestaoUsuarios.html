@@ -7,16 +7,6 @@
     <title>Gestão de Usuários | Outbound System</title>
     <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
     <link rel="stylesheet" href="../css/style.css">
-    <style>
-        /* Bloqueio crítico inline - impede renderização mesmo com delay de rede */
-        .auth-pending #main-content, 
-        .auth-pending .dashboard-wrapper, 
-        .auth-pending .sidebar, 
-        .auth-pending .main-wrapper,
-        .auth-pending .gestao-usuarios-container { 
-            display: none !important; 
-        }
-    </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -453,7 +443,7 @@
     </style>
 </head>
 
-<body class="auth-pending">
+<body>
     <div id="preloader">
         <div class="brand-container" id="logoText"></div>
         <div class="subtitle-intro">System</div>
@@ -674,9 +664,6 @@
     <script src="../js/core/animation.js"></script>
     <script src="../js/core/auth.js"></script>
     <script src="../js/core/permissions.js"></script>
-    <script src="../js/core/permission-guard.js"></script>
-    <script src="../js/core/screen-guard.js"></script>
-    <script src="../js/core/admin-guard.js"></script>
     <script src="../js/core/menu-controller.js"></script>
     <script src="../js/core/sidebar-user.js"></script>
     

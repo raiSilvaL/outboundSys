@@ -7,22 +7,13 @@
     <title>Outbound System - Feedback de Faltas</title>
     <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
     <link rel="stylesheet" href="../css/style.css">
-    <style>
-        /* Bloqueio crítico inline - impede renderização mesmo com delay de rede */
-        .auth-pending #main-content, 
-        .auth-pending .dashboard-wrapper, 
-        .auth-pending .sidebar, 
-        .auth-pending .main-wrapper { 
-            display: none !important; 
-        }
-    </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="auth-pending">
+<body>
     <!-- Overlay da Animação de Entrada -->
     <div id="preloader">
         <div class="brand-container" id="logoText"></div>
@@ -89,17 +80,15 @@
 
             <!-- Main Content -->
             <div class="main-wrapper">
+                <!-- Tela Principal de Feedback -->
                 <div id="screen-feedback-main" class="screen active">
                     <div class="container">
+                        <!-- Título da Seção -->
                         <section class="stats-section">
                             <h1>Controle de Feedback de Faltas</h1>
                         </section>
 
-                        <div id="loading-spinner" class="loading-spinner">
-                            <div class="spinner"></div>
-                            <p id="loading-text">Carregando dados...</p>
-                        </div>
-
+                        <!-- Filtros de Período -->
                         <section class="filters-section">
                             <h2>Filtro de Período</h2>
                             <div class="filters-grid">
@@ -118,6 +107,7 @@
                             </div>
                         </section>
 
+                        <!-- Cards de Resumo -->
                         <section class="stats-section">
                             <div class="stats-grid">
                                 <div class="stat-card">
@@ -135,6 +125,7 @@
                             </div>
                         </section>
 
+                        <!-- Seção de Carrossel (Gráfico vs. Tabela) -->
                         <section class="content-carousel-section">
                             <div class="carousel-header">
                                 <h2 id="carousel-title">Análise de Faltas</h2>
@@ -144,394 +135,396 @@
                                 </div>
                             </div>
 
+                            <!-- Slide 1: Gráfico de Barras -->
                             <div id="carousel-slide-0" class="carousel-slide active">
                                 <div id="chart-container" style="height: 350px; margin-bottom: 2rem;">
                                     <canvas id="feedbackChart"></canvas>
                                 </div>
                             </div>
 
+                            <!-- Slide 2: Gráfico de Motivos -->
                             <div id="carousel-slide-1" class="carousel-slide" style="display: none;">
                                 <div id="motivos-chart-container" style="height: 350px; margin-bottom: 2rem;">
                                     <canvas id="motivosChart"></canvas>
                                 </div>
                             </div>
 
+                            <!-- Slide 3: Tabela de Registros -->
                             <div id="carousel-slide-2" class="carousel-slide" style="display: none;">
                                 <div class="export-buttons-container" style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 10px;">
+                                    <button id="open-forms-btn" class="btn-apply btn-form" style="margin-right: 10px;">
+                                        <i class="fas fa-plus"></i> Abrir Formulário
+                                    </button>
                                     <button id="export-excel-btn" class="export-btn export-btn-excel" title="Exportar Excel">📊</button>
                                     <button id="export-csv-btn" class="export-btn export-btn-csv" title="Exportar CSV">📄</button>
                                 </div>
 
                                 <div class="table-wrapper">
-                                    <table class="audits-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Data</th>
-                                                <th>Ações</th>
-                                                <th>
-                                                    <div class="header-with-filter">
-                                                        Nome
-                                                        <input type="text" class="col-excel-filter-text" data-column="nome" placeholder="Buscar..." title="Digite para filtrar por nome">
-                                                    </div>
-                                                </th>
-                                                <th>
-                                                    <div class="header-with-filter">
-                                                        CPF
-                                                        <input type="text" class="col-excel-filter-text" data-column="cpf" placeholder="Buscar..." title="Digite para filtrar por CPF">
-                                                    </div>
-                                                </th>
-                                                <th>
-                                                    <div class="header-with-filter">
-                                                        Setor
-                                                        <div class="multi-select-wrapper" data-column="setor">
-                                                            <button class="multi-select-btn">
-                                                                <span class="multi-select-label">(Tudo)</span>
-                                                                <span class="multi-select-arrow">▼</span>
-                                                            </button>
-                                                            <div class="multi-select-dropdown">
-                                                                <div class="multi-select-search-wrap">
-                                                                    <input type="text" class="multi-select-search" placeholder="Pesquisar...">
-                                                                </div>
-                                                                <div class="multi-select-options"></div>
-                                                                <div class="multi-select-footer">
-                                                                    <button class="multi-select-clear">Limpar</button>
-                                                                </div>
+                                <table class="audits-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Nome
+                                                    <input type="text" class="col-excel-filter-text" data-column="nome" placeholder="Buscar..." title="Digite para filtrar por nome">
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    CPF
+                                                    <input type="text" class="col-excel-filter-text" data-column="cpf" placeholder="Buscar..." title="Digite para filtrar por CPF">
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Setor
+                                                    <div class="multi-select-wrapper" data-column="setor">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </th>
-                                                <th>
-                                                    <div class="header-with-filter">
-                                                        Departamento
-                                                        <div class="multi-select-wrapper" data-column="departamento">
-                                                            <button class="multi-select-btn">
-                                                                <span class="multi-select-label">(Tudo)</span>
-                                                                <span class="multi-select-arrow">▼</span>
-                                                            </button>
-                                                            <div class="multi-select-dropdown">
-                                                                <div class="multi-select-search-wrap">
-                                                                    <input type="text" class="multi-select-search" placeholder="Pesquisar...">
-                                                                </div>
-                                                                <div class="multi-select-options"></div>
-                                                                <div class="multi-select-footer">
-                                                                    <button class="multi-select-clear">Limpar</button>
-                                                                </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Departamento
+                                                    <div class="multi-select-wrapper" data-column="departamento">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </th>
-                                                <th>
-                                                    <div class="header-with-filter">
-                                                        Empregador
-                                                        <div class="multi-select-wrapper" data-column="empregador">
-                                                            <button class="multi-select-btn">
-                                                                <span class="multi-select-label">(Tudo)</span>
-                                                                <span class="multi-select-arrow">▼</span>
-                                                            </button>
-                                                            <div class="multi-select-dropdown">
-                                                                <div class="multi-select-search-wrap">
-                                                                    <input type="text" class="multi-select-search" placeholder="Pesquisar...">
-                                                                </div>
-                                                                <div class="multi-select-options"></div>
-                                                                <div class="multi-select-footer">
-                                                                    <button class="multi-select-clear">Limpar</button>
-                                                                </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Empregador
+                                                    <div class="multi-select-wrapper" data-column="empregador">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </th>
-                                                <th>
-                                                    <div class="header-with-filter">
-                                                        Turno
-                                                        <div class="multi-select-wrapper" data-column="turno">
-                                                            <button class="multi-select-btn">
-                                                                <span class="multi-select-label">(Tudo)</span>
-                                                                <span class="multi-select-arrow">▼</span>
-                                                            </button>
-                                                            <div class="multi-select-dropdown">
-                                                                <div class="multi-select-search-wrap">
-                                                                    <input type="text" class="multi-select-search" placeholder="Pesquisar...">
-                                                                </div>
-                                                                <div class="multi-select-options"></div>
-                                                                <div class="multi-select-footer">
-                                                                    <button class="multi-select-clear">Limpar</button>
-                                                                </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Turno
+                                                    <div class="multi-select-wrapper" data-column="turno">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </th>
-                                                <th>Data Feedback</th>
-                                                <th>
-                                                    <div class="header-with-filter">
-                                                        Motivo
-                                                        <div class="multi-select-wrapper" data-column="motivo">
-                                                            <button class="multi-select-btn">
-                                                                <span class="multi-select-label">(Tudo)</span>
-                                                                <span class="multi-select-arrow">▼</span>
-                                                            </button>
-                                                            <div class="multi-select-dropdown">
-                                                                <div class="multi-select-search-wrap">
-                                                                    <input type="text" class="multi-select-search" placeholder="Pesquisar...">
-                                                                </div>
-                                                                <div class="multi-select-options"></div>
-                                                                <div class="multi-select-footer">
-                                                                    <button class="multi-select-clear">Limpar</button>
-                                                                </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Coordenador
+                                                    <div class="multi-select-wrapper" data-column="coordenador">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </th>
-                                                <th>Observação</th>
-                                                <th>
-                                                    <div class="header-with-filter">
-                                                        Status
-                                                        <div class="multi-select-wrapper" data-column="status">
-                                                            <button class="multi-select-btn">
-                                                                <span class="multi-select-label">(Tudo)</span>
-                                                                <span class="multi-select-arrow">▼</span>
-                                                            </button>
-                                                            <div class="multi-select-dropdown">
-                                                                <div class="multi-select-search-wrap">
-                                                                    <input type="text" class="multi-select-search" placeholder="Pesquisar...">
-                                                                </div>
-                                                                <div class="multi-select-options"></div>
-                                                                <div class="multi-select-footer">
-                                                                    <button class="multi-select-clear">Limpar</button>
-                                                                </div>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Data Feedback
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Motivo
+                                                    <div class="multi-select-wrapper" data-column="motivo">
+                                                        <button class="multi-select-btn">
+                                                            <span class="multi-select-label">(Tudo)</span>
+                                                            <span class="multi-select-arrow">▼</span>
+                                                        </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="feedback-table-body">
-                                            <!-- Preenchido via JS -->
-                                        </tbody>
-                                    </table>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Observação
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="header-with-filter">
+                                                    Status Feedback
+                                                    <div class="multi-select-wrapper" data-column="status">
+                                                        <button class="multi-select-btn">
+                                                        <span class="multi-select-label">(Tudo)</span>
+                                                        <span class="multi-select-arrow">▼</span>
+                                                    </button>
+                                                        <div class="multi-select-dropdown">
+                                                            <input type="text" class="multi-select-search" placeholder="Pesquisar...">
+                                                            <div class="multi-select-options"></div>
+                                                            <div class="multi-select-footer">
+                                                                <button class="multi-select-clear">Limpar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="feedback-table-body">
+                                        <!-- Dados serão inseridos via JS futuramente -->
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; padding: 20px;">Aguardando carregamento de dados...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                                 </div>
                             </div>
                         </section>
+
+                        <div id="loading-spinner" class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>Carregando registros...</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Modal de Feedback de Faltas -->
+        <div id="feedback-modal" class="feedback-modal">
+            <div class="feedback-modal-content">
+                <div class="feedback-modal-header">
+                    <h2 class="feedback-modal-title">Feedback de Falta</h2>
+                    <button class="feedback-modal-close" onclick="closeFeedbackModal()" title="Fechar">&times;</button>
+                </div>
+
+                <!-- Iframe do Formulário Google Apps Script -->
+                <iframe id="feedback-iframe" src="" frameborder="0" style="width: 100%; height: 600px; border-radius: 16px;"></iframe>
+            </div>
+        </div>
+
+        <style>
+            /* Modal de Feedback */
+            
+            .feedback-modal {
+                display: none;
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(10, 14, 39, 0.8);
+                backdrop-filter: blur(5px);
+                z-index: 3000;
+                justify-content: center;
+                align-items: center;
+                padding: 1rem;
+            }
+            
+            .feedback-modal.active {
+                display: flex;
+            }
+            
+            .feedback-modal-content {
+                background: rgba(30, 41, 59, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(56, 189, 248, 0.2);
+                border-radius: 16px;
+                max-width: 600px;
+                width: 100%;
+                max-height: 80vh;
+                overflow-y: auto;
+                padding: 2rem;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            }
+            
+            .feedback-modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            }
+            
+            .feedback-modal-title {
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: #38bdf8;
+            }
+            
+            .feedback-modal-close {
+                background: none;
+                border: none;
+                color: #94a3b8;
+                font-size: 2rem;
+                cursor: pointer;
+                transition: all 0.3s;
+                padding: 0;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .feedback-modal-close:hover {
+                color: #38bdf8;
+                transform: rotate(90deg);
+            }
+            
+            .feedback-form {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .feedback-form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .feedback-label {
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #cbd5e1;
+                text-transform: uppercase;
+            }
+            
+            .required {
+                color: #ef4444;
+            }
+            
+            .feedback-input,
+            .feedback-textarea {
+                padding: 0.75rem 1rem;
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(56, 189, 248, 0.2);
+                border-radius: 8px;
+                color: #e0e7ff;
+                font-family: 'Montserrat', sans-serif;
+                font-size: 0.9rem;
+                transition: all 0.3s;
+            }
+            
+            .feedback-input:focus,
+            .feedback-textarea:focus {
+                outline: none;
+                border-color: #38bdf8;
+                background: rgba(15, 23, 42, 0.8);
+                box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+            }
+            
+            .feedback-input:readonly {
+                background: rgba(15, 23, 42, 0.4);
+                color: #94a3b8;
+                cursor: not-allowed;
+            }
+            
+            .feedback-textarea {
+                resize: vertical;
+                min-height: 100px;
+                font-family: 'Montserrat', sans-serif;
+            }
+            
+            .feedback-form-actions {
+                display: flex;
+                gap: 1rem;
+                margin-top: 1rem;
+                justify-content: flex-end;
+            }
+            
+            .btn-cancel,
+            .btn-submit {
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                font-family: 'Montserrat', sans-serif;
+                font-size: 0.9rem;
+            }
+            
+            .btn-cancel {
+                background: rgba(56, 189, 248, 0.1);
+                color: #38bdf8;
+                border: 1px solid rgba(56, 189, 248, 0.3);
+            }
+            
+            .btn-cancel:hover {
+                background: rgba(56, 189, 248, 0.2);
+            }
+            
+            .btn-submit {
+                background: #38bdf8;
+                color: #0f172a;
+            }
+            
+            .btn-submit:hover {
+                background: #0ea5e9;
+            }
+            
+            .btn-submit:disabled {
+                background: #64748b;
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
+        </style>
     </main>
 
-    <!-- Overlay de Atualização -->
-    <div id="update-overlay" class="loading-spinner">
-        <div class="spinner"></div>
-        <p>Atualizando dados...</p>
-    </div>
-
-    <!-- Modal de Feedback -->
-    <div id="feedback-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-comment-dots"></i> Registrar Feedback</h3>
-                <button id="close-modal-btn" class="close-btn">&times;</button>
-            </div>
-            <form id="feedback-form-native">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Colaborador</label>
-                        <input type="text" id="modal-nome" readonly class="form-input-readonly">
-                    </div>
-                    <div class="form-group">
-                        <label>CPF</label>
-                        <input type="text" id="modal-cpf" readonly class="form-input-readonly">
-                    </div>
-                    <div class="form-group">
-                        <label>Data da Falta</label>
-                        <input type="text" id="modal-data-falta" readonly class="form-input-readonly">
-                    </div>
-                    <div class="form-group">
-                        <label for="modal-motivo">Motivo da Falta</label>
-                        <select id="modal-motivo" required class="form-select">
-                            <option value="">Selecione um motivo...</option>
-                            <option value="Atestado médico">Atestado médico</option>
-                            <option value="Atestado de óbito">Atestado de óbito</option>
-                            <option value="Não justificado">Não justificado</option>
-                            <option value="Problemas pessoais">Problemas pessoais</option>
-                            <option value="Licença Gala (Casamento)">Licença Gala (Casamento)</option>
-                            <option value="Doação de Sangue">Doação de Sangue</option>
-                            <option value="Falha de Transporte">Falha de Transporte</option>
-                            <option value="Serviço Militar/Eleitoral">Serviço Militar/Eleitoral</option>
-                            <option value="Acompanhamento familiar">Acompanhamento familiar</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-                    <div class="form-group full-width" id="outro-motivo-container" style="display: none;">
-                        <label for="modal-outro-motivo">Especifique o Motivo</label>
-                        <input type="text" id="modal-outro-motivo" class="form-input" placeholder="Digite o motivo...">
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="modal-observacao">Observação</label>
-                        <textarea id="modal-observacao" rows="3" class="form-textarea" placeholder="Detalhes adicionais..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="cancel-modal-btn" class="btn-reset">Cancelar</button>
-                    <button type="submit" class="btn-apply" id="submit-feedback-btn">Salvar Feedback</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <style>
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 14, 39, 0.85);
-            backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            animation: modalFadeIn 0.3s ease;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: #1e293b;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            border-radius: 16px;
-            width: 90%;
-            max-width: 600px;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-header h3 {
-            color: #38bdf8;
-            font-size: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            font-size: 2rem;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .close-btn:hover {
-            color: #ef4444;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .full-width {
-            grid-column: span 2;
-        }
-
-        .form-group label {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            font-weight: 600;
-        }
-
-        .form-input-readonly {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            color: #64748b;
-            padding: 0.75rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: not-allowed;
-        }
-
-        .form-select, .form-textarea {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            color: #e0e7ff;
-            padding: 0.75rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.1);
-        }
-
-        .modal-footer {
-            margin-top: 2rem;
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-        }
-
-        .btn-action-feedback {
-            background: rgba(56, 189, 248, 0.1);
-            color: #38bdf8;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .btn-action-feedback:hover {
-            background: #38bdf8;
-            color: #0f172a;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
-
-    <!-- Scripts Core -->
+        <!-- Scripts Core -->
     <script src="../js/core/utils.js"></script>
     <script src="../js/core/animation.js"></script>
     <script src="../js/core/ui-controller.js"></script>
     <script src="../js/core/portal.js"></script>
     <script src="../js/core/auth.js"></script>
     <script src="../js/core/permissions.js"></script>
-    <script src="../js/core/permission-guard.js"></script>
-    <script src="../js/core/screen-guard.js"></script>
     <script src="../js/core/menu-controller.js"></script>
     <script src="../js/core/sidebar-user.js"></script>
     <!-- Módulo Específico -->
