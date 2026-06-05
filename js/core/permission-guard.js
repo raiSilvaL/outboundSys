@@ -59,19 +59,42 @@ class PermissionGuard {
     }
 
     /**
-     * Obtém a página atual do navegador
+     * Obtém a página atual do navegador de forma normalizada para Netlify/Produção
      */
     obterPaginaAtual() {
-        const pathname = window.location.pathname;
+        let pathname = window.location.pathname;
+        
+        // Remover a barra inicial se existir
+        if (pathname.startsWith('/')) pathname = pathname.substring(1);
+        
+        // Se for vazio, é o index
+        if (pathname === '' || pathname === 'index' || pathname === 'index.html') return 'index.html';
+        
+        // Obter apenas o nome do arquivo final
         const partes = pathname.split('/');
-        return partes[partes.length - 1] || 'index.html';
+        let arquivo = partes[partes.length - 1];
+        
+        // Normalizar: garantir que tenha .html para bater com o mapa de permissões
+        if (arquivo && !arquivo.includes('.')) {
+            arquivo += '.html';
+        }
+        
+        return arquivo || 'index.html';
     }
 
     /**
      * Valida acesso à página atual e redireciona se necessário
      */
     validarAcessoPagina() {
+        const pathname = window.location.pathname;
+        const estaEmSubpastaHtml = pathname.includes('/html/');
+        
         if (!auth || !auth.estaAutenticado()) {
+            // Se não está autenticado e tenta acessar algo em /html/, bloqueia
+            if (estaEmSubpastaHtml) {
+                this.redirecionar(pathname.includes('/html/') ? 'login.html' : 'html/login.html');
+                return false;
+            }
             return false; 
         }
 
@@ -85,15 +108,18 @@ class PermissionGuard {
         }
 
         // Se estiver no index, apenas remove o bloqueio
-        if (paginaAtual === 'index.html' || paginaAtual === '') {
+        if (paginaAtual === 'index.html') {
             document.body.classList.remove('auth-pending');
             return true;
         }
 
-        if (!this.temPermissaoPagina(usuario.nivel, paginaAtual)) {
-            console.warn(`Acesso negado à página ${paginaAtual} para usuário ${usuario.nivel}`);
-            this.redirecionar('../index.html');
-            return false;
+        // Se está em /html/, PRECISA estar no mapa de permissões
+        if (estaEmSubpastaHtml) {
+            if (!this.temPermissaoPagina(usuario.nivel, paginaAtual)) {
+                console.warn(`Acesso negado à página ${paginaAtual} para usuário ${usuario.nivel}`);
+                this.redirecionar('../index.html');
+                return false;
+            }
         }
 
         // Se passou em todas as validações, remove a classe de bloqueio
@@ -162,12 +188,16 @@ class PermissionGuard {
     }
 
     /**
-     * Redireciona para uma página com segurança
+     * Redireciona para uma página com segurança máxima
      */
     redirecionar(url) {
+        // Redirecionamento imediato para evitar qualquer renderização
+        window.location.replace(url);
+        
+        // Fallback caso o replace falhe
         setTimeout(() => {
             window.location.href = url;
-        }, 100);
+        }, 5);
     }
 
     /**

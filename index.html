@@ -7,6 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Outbound System | Portal Central</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Bloqueio crítico inline - impede renderização mesmo com delay de rede */
+        .auth-pending #main-content, 
+        .auth-pending .hub-container { 
+            display: none !important; 
+        }
+    </style>
     <!-- Fontes -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <!-- Font Awesome para ícones -->
