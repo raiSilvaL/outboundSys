@@ -37,7 +37,8 @@ async function loadDashboardData() {
         const resConfronto = await fetchWithTimeout(API_CONFRONTO_URL);
         confrontoData = await resConfronto.json();
 
-        filteredData = [...allData];
+        // Filtrar para os últimos 7 dias por padrão
+        filteredData = filterDataByLast7Days([...allData]);
         
         // Executar atualizações de UI com segurança para garantir que o spinner suma
         try { updateStats(); } catch (err) { console.error("Erro em updateStats:", err); }
@@ -89,8 +90,10 @@ function updateCharts() {
 }
 
 function updateDepartmentChart() {
+    // Garantir que apenas os últimos 7 dias sejam exibidos
+    const dataFor7Days = filterDataByLast7Days(filteredData);
     const auditsByDate = {};
-    filteredData.forEach(item => {
+    dataFor7Days.forEach(item => {
         const d = parseAnyDate(item.Data);
         if (d) {
             const key = d.toISOString().split('T')[0];
@@ -136,8 +139,10 @@ function updateDepartmentChart() {
 }
 
 function updateScoreChart() {
+    // Garantir que apenas os últimos 7 dias sejam exibidos
+    const dataFor7Days = filterDataByLast7Days(filteredData);
     const ranges = { '90-100%': 0, '70-89%': 0, '50-69%': 0, '< 50%': 0 };
-    filteredData.forEach(item => {
+    dataFor7Days.forEach(item => {
         const scoreStr = (item.Score || "0").toString();
         const score = parseFloat(scoreStr.replace('%', '')) || 0;
         if (score >= 90) ranges['90-100%']++;
@@ -193,6 +198,19 @@ function populateFilters() {
     initializeDashboardFilters();
 }
 
+function filterDataByLast7Days(data) {
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+    today.setHours(23, 59, 59, 999);
+
+    return data.filter(item => {
+        const d = parseAnyDate(item.Data);
+        if (!d) return false;
+        return d >= sevenDaysAgo && d <= today;
+    });
+}
+
 function initializeDashboardFilters() {
     const applyBtn = document.getElementById('apply-filters');
     const resetBtn = document.getElementById('reset-filters');
@@ -225,7 +243,7 @@ function initializeDashboardFilters() {
             deptFilter.value = '';
             dateStart.value = '';
             dateEnd.value = '';
-            filteredData = [...allData];
+            filteredData = filterDataByLast7Days([...allData]);
             updateStats();
             updateCharts();
             updateTable();

@@ -23,10 +23,12 @@
     <!-- Conteúdo Principal -->
     <main id="main-content" class="hidden">
         <div class="hub-container">
-            <header class="hub-header">
+            <header class="hub-header" style="position: relative;">
                 <h1 class="hub-title">Outbound System</h1>
                 <p class="hub-subtitle">Selecione o módulo que deseja acessar para gerenciar suas operações.</p>
             </header>
+            <!-- User Card Padrão (igual ao da sidebar) -->
+            <div id="user-card-wrapper" style="position: absolute; top: 2rem; right: 2rem; z-index: 1000;"></div>
 
             <div class="modules-grid">
                 <!-- Módulo: Auditoria HSE -->
@@ -150,54 +152,36 @@
 
             const usuario = auth.obterUsuarioAtual();
             
-            // Adicionar indicador de usuário no canto superior direito
-            const header = document.querySelector('.hub-header');
-            if (header) {
-                const gradienteUsuario = permissions.obterCorNivel(usuario.nivel);
-                const userWrapper = document.createElement('div');
-                userWrapper.id = 'user-dropdown-wrapper';
-                userWrapper.style.cssText = 'position: absolute; top: 2rem; right: 2rem; z-index: 1000;';
-                
+            // Adicionar indicador de usuário usando o padrão de user-card da sidebar
+            const userCardWrapper = document.getElementById('user-card-wrapper');
+            if (userCardWrapper) {
                 const iniciais = usuario.nome.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
                 
-                userWrapper.innerHTML = `
-                    <div id="user-avatar-btn" style="width: 45px; height: 45px; background: ${gradienteUsuario}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); cursor: pointer; transition: all 0.3s ease; border: 2px solid rgba(255,255,255,0.1);">
-                        ${iniciais}
-                    </div>
-                    <div id="user-menu-content" style="display: none; position: absolute; top: 55px; right: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 12px; padding: 1.2rem; min-width: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: fadeIn 0.3s ease;">
-                        <div style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.8rem;">
-                            <div style="color: #e0e7ff; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.2rem;">${usuario.nome}</div>
-                            <div style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">${usuario.nivel}</div>
+                userCardWrapper.innerHTML = `
+                    <div class="user-card" style="flex-direction: row; width: auto; padding: 0.75rem 1rem;">
+                        <div class="user-avatar" id="user-avatar-index" style="width: 45px; height: 45px; font-size: 1rem;">${iniciais}</div>
+                        <div class="user-info">
+                            <p class="user-name" id="user-name-index" style="font-size: 0.9rem;">${usuario.nome}</p>
+                            <p class="user-level" id="user-level-index">${usuario.nivel}</p>
                         </div>
-                        <button id="logout-btn" style="width: 100%; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                            <i class="fas fa-sign-out-alt"></i> Sair do Sistema
+                        <button class="user-logout" id="logout-btn-index" style="margin-left: 0.5rem;">
+                            <i class="fas fa-sign-out-alt"></i>
                         </button>
                     </div>
                 `;
-                header.parentElement.insertBefore(userWrapper, header);
                 
-                const avatarBtn = document.getElementById('user-avatar-btn');
-                const menuContent = document.getElementById('user-menu-content');
+                // Avatar usa o gradiente azul padrão (sem cor de nível)
+                // O estilo já vem do CSS da classe user-avatar
                 
-                avatarBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isVisible = menuContent.style.display === 'block';
-                    menuContent.style.display = isVisible ? 'none' : 'block';
-                    avatarBtn.style.transform = isVisible ? 'scale(1)' : 'scale(1.1)';
-                    avatarBtn.style.borderColor = isVisible ? 'rgba(255,255,255,0.1)' : '#38bdf8';
-                });
-
-                document.addEventListener('click', () => {
-                    menuContent.style.display = 'none';
-                    avatarBtn.style.transform = 'scale(1)';
-                    avatarBtn.style.borderColor = 'rgba(255,255,255,0.1)';
-                });
-
-                document.getElementById('logout-btn').addEventListener('click', () => {
-                    if (confirm('Tem certeza que deseja fazer logout?')) {
-                        auth.logout();
-                    }
-                });
+                // Evento de logout
+                const logoutBtn = document.getElementById('logout-btn-index');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        if (confirm('Tem certeza que deseja fazer logout?')) {
+                            auth.logout();
+                        }
+                    });
+                }
             }
 
             // Filtrar módulos por permissão usando o PermissionSystem

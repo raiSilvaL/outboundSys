@@ -1,12 +1,11 @@
 /**
- * Módulo de Feedback de Faltas (Versão 2)
+ * Módulo de Feedback de Faltas (Versão Atualizada)
  * Responsável pela gestão da interface e integração com a API de Registro de Faltas
  * 
- * Mudanças v2:
- * - Adicionado select com motivos específicos
- * - Campo "Outros" que exibe textarea quando selecionado
- * - Removido campo de observações adicionais
- * - Corrigida integração com API do Google Script
+ * Mudanças:
+ * - Adicionada coluna "Ação" na tabela com botão para abrir formulário interno
+ * - Substituído iframe por modal com formulário HTML/CSS/JS nativo
+ * - Integração direta com API do Google Script para envio de respostas
  */
 
 const API_URL = "https://script.google.com/macros/s/AKfycby3Jm4vjjg-ArnnbwQui_LiBOH-nqiATyL47X-xel5PR4JJBHrpKj9sCoCQl3UsR9AQnQ/exec?aba=Registro%20de%20Faltas";
@@ -116,8 +115,7 @@ async function loadFeedbackData() {
             return normalizedItem;
         });
 
-        // Filtrar para os últimos 7 dias por padrão
-        filteredFeedbackData = filterDataByLast7Days(allFeedbackData);
+        filteredFeedbackData = allFeedbackData;
         renderFeedbackTable(filteredFeedbackData);
         updateStats(filteredFeedbackData);
         renderFeedbackChart(filteredFeedbackData);
@@ -132,7 +130,7 @@ async function loadFeedbackData() {
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
         if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="14" style="text-align: center; color: #ef4444;">Erro ao carregar dados. Verifique a conexão.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: #ef4444;">Erro ao carregar dados. Verifique a conexão.</td></tr>';
         }
         // Ocultar spinner em caso de erro
         if (spinner) spinner.style.display = 'none';
@@ -144,7 +142,7 @@ function renderFeedbackTable(data) {
     if (!tableBody) return;
 
     if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="14" style="text-align: center;">Nenhum registro encontrado.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center;">Nenhum registro encontrado.</td></tr>';
         return;
     }
 
@@ -194,19 +192,6 @@ function updateStats(data) {
     if (concluidosEl) concluidosEl.textContent = feedbacksConcluidos;
 }
 
-function filterDataByLast7Days(data) {
-    const today = new Date();
-    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
-    today.setHours(23, 59, 59, 999);
-
-    return data.filter(item => {
-        const d = new Date(item.dataFalta);
-        if (isNaN(d.getTime())) return false;
-        return d >= sevenDaysAgo && d <= today;
-    });
-}
-
 function setupEventListeners() {
     // Filtros de período
     const applyBtn = document.getElementById('apply-feedback-filters');
@@ -226,12 +211,7 @@ function setupEventListeners() {
             document.getElementById('feedback-date-start').value = '';
             document.getElementById('feedback-date-end').value = '';
             feedbackPeriodFilters = { startDate: null, endDate: null };
-            // Restaurar filtro de 7 dias ao resetar
-            filteredFeedbackData = filterDataByLast7Days(allFeedbackData);
-            renderFeedbackTable(filteredFeedbackData);
-            updateStats(filteredFeedbackData);
-            renderFeedbackChart(filteredFeedbackData);
-            renderMotivosChart(filteredFeedbackData);
+            applyFilters();
         };
     }
 }
@@ -440,7 +420,7 @@ function getTableDataForExport() {
 }
 
 function getTableHeaders() {
-    return ['Data Falta', 'Nome', 'CPF', 'Setor', 'Departamento', 'Empregador', 'Turno', 'Coordenador', 'Data Feedback', 'Motivo', 'Justificativa', 'Status'];
+    return ['Data Falta', 'Nome', 'CPF', 'Setor', 'Departamento', 'Empregador', 'Turno', 'Coordenador', 'Data Feedback', 'Motivo', 'Observacao', 'Status'];
 }
 
 function exportTableToExcel() {
@@ -495,14 +475,11 @@ function openFeedbackModalWithData(index) {
     document.getElementById('feedback-nome').value = item.nome || '-';
     document.getElementById('feedback-cpf').value = item.cpf || '-';
     document.getElementById('feedback-data-falta').value = item.dataFalta ? new Date(item.dataFalta).toLocaleDateString('pt-BR') : '-';
+    document.getElementById('feedback-motivo').value = item.motivo || '-';
 
     // Limpar campos de resposta
-    document.getElementById('feedback-motivo-select').value = '';
-    document.getElementById('feedback-outros-motivo').value = '';
     document.getElementById('feedback-justificativa').value = '';
-    
-    // Ocultar campo de "Outros"
-    document.getElementById('outros-text-group').style.display = 'none';
+    document.getElementById('feedback-observacoes').value = '';
 
     // Limpar mensagem anterior
     const messageEl = document.getElementById('feedback-message');
@@ -514,15 +491,14 @@ function openFeedbackModalWithData(index) {
 
     // Se já foi respondido, preencher com dados existentes
     if (item.statusCalculado === 'Concluído') {
-        document.getElementById('feedback-motivo-select').value = item.motivo || '';
         document.getElementById('feedback-justificativa').value = item.observacao || '';
-        document.getElementById('feedback-motivo-select').disabled = true;
         document.getElementById('feedback-justificativa').disabled = true;
+        document.getElementById('feedback-observacoes').disabled = true;
         document.getElementById('feedback-submit-btn').disabled = true;
         document.getElementById('feedback-submit-btn').textContent = 'Já Respondido';
     } else {
-        document.getElementById('feedback-motivo-select').disabled = false;
         document.getElementById('feedback-justificativa').disabled = false;
+        document.getElementById('feedback-observacoes').disabled = false;
         document.getElementById('feedback-submit-btn').disabled = false;
         document.getElementById('feedback-submit-btn').textContent = 'Enviar Resposta';
     }
@@ -557,24 +533,6 @@ function setupFeedbackFormListener() {
         await submitFeedback();
     });
 
-    // Listener para o select de motivo
-    const motivoSelect = document.getElementById('feedback-motivo-select');
-    if (motivoSelect) {
-        motivoSelect.addEventListener('change', (e) => {
-            const outrosGroup = document.getElementById('outros-text-group');
-            const outrosTextarea = document.getElementById('feedback-outros-motivo');
-            
-            if (e.target.value === 'Outros') {
-                outrosGroup.style.display = 'flex';
-                outrosTextarea.required = true;
-            } else {
-                outrosGroup.style.display = 'none';
-                outrosTextarea.required = false;
-                outrosTextarea.value = '';
-            }
-        });
-    }
-
     // Fechar modal ao clicar fora
     const modal = document.getElementById('feedback-modal');
     if (modal) {
@@ -592,23 +550,12 @@ function setupFeedbackFormListener() {
 async function submitFeedback() {
     if (!currentFeedbackItem) return;
 
-    const motivoSelect = document.getElementById('feedback-motivo-select').value.trim();
-    const outrosMotivo = document.getElementById('feedback-outros-motivo').value.trim();
     const justificativa = document.getElementById('feedback-justificativa').value.trim();
+    const observacoes = document.getElementById('feedback-observacoes').value.trim();
     const submitBtn = document.getElementById('feedback-submit-btn');
     const messageEl = document.getElementById('feedback-message');
 
     // Validação
-    if (!motivoSelect) {
-        showFeedbackMessage('Por favor, selecione um motivo.', 'error');
-        return;
-    }
-
-    if (motivoSelect === 'Outros' && !outrosMotivo) {
-        showFeedbackMessage('Por favor, especifique o motivo.', 'error');
-        return;
-    }
-
     if (!justificativa) {
         showFeedbackMessage('Por favor, preencha a justificativa.', 'error');
         return;
@@ -619,34 +566,17 @@ async function submitFeedback() {
     submitBtn.textContent = 'Enviando...';
 
     try {
-        // Determinar o motivo final (se "Outros", usar o texto especificado)
-        const motivoFinal = motivoSelect === 'Outros' ? outrosMotivo : motivoSelect;
-
-        // Formatar a data da falta para o padrão esperado pela planilha (DD/MM/AAAA)
-        let dataFaltaFormatada = currentFeedbackItem.dataFalta;
-        if (dataFaltaFormatada && dataFaltaFormatada.includes('T')) {
-            // Se estiver em formato ISO, converter para DD/MM/AAAA
-            const date = new Date(dataFaltaFormatada);
-            dataFaltaFormatada = String(date.getDate()).padStart(2, '0') + '/' + 
-                                String(date.getMonth() + 1).padStart(2, '0') + '/' + 
-                                date.getFullYear();
-        } else if (dataFaltaFormatada && !dataFaltaFormatada.includes('/')) {
-            // Se estiver em AAAA-MM-DD, converter para DD/MM/AAAA
-            const [ano, mes, dia] = dataFaltaFormatada.split('-');
-            dataFaltaFormatada = dia + '/' + mes + '/' + ano;
-        }
-
-        // Preparar dados para envio conforme esperado pela API
+        // Preparar dados para envio
         const payload = {
+            nome: currentFeedbackItem.nome,
             cpf: currentFeedbackItem.cpf,
-            dataFalta: dataFaltaFormatada,
-            motivo: motivoFinal,
+            dataFalta: currentFeedbackItem.dataFalta,
+            motivo: currentFeedbackItem.motivo,
+            justificativa: justificativa,
+            observacoes: observacoes,
             dataFeedback: new Date().toISOString().split('T')[0],
-            observacao: justificativa
+            quemRespondeu: 'Sistema' // Pode ser preenchido com usuário logado
         };
-
-        console.log('Enviando payload:', payload);
-        console.log('Data formatada:', dataFaltaFormatada);
 
         // Enviar para API usando POST
         const response = await fetch(FEEDBACK_API_URL, {
@@ -664,11 +594,8 @@ async function submitFeedback() {
 
         const resultado = await response.json();
 
-        console.log('Resposta da API:', resultado);
-        console.log('Payload enviado:', payload);
-
         // Verificar resposta da API
-        if (resultado && (resultado.success || resultado.sucesso)) {
+        if (resultado.success || resultado.sucesso) {
             showFeedbackMessage('Feedback enviado com sucesso!', 'success');
             
             // Recarregar dados após 1.5 segundos
@@ -677,8 +604,7 @@ async function submitFeedback() {
                 loadFeedbackData();
             }, 1500);
         } else {
-            const errorMsg = resultado ? (resultado.error || resultado.erro || 'Erro desconhecido') : 'Resposta vazia da API';
-            throw new Error(errorMsg);
+            throw new Error(resultado.error || resultado.erro || 'Erro desconhecido');
         }
 
     } catch (error) {
@@ -752,12 +678,9 @@ function renderFeedbackChart(data) {
     const ctx = document.getElementById('feedbackChart');
     if (!ctx) return;
 
-    // Garantir que apenas os últimos 7 dias sejam exibidos
-    const dataFor7Days = filterDataByLast7Days(data);
-
     // Agrupar dados por data
     const dataByDate = {};
-    dataFor7Days.forEach(item => {
+    data.forEach(item => {
         const date = item.dataFalta ? new Date(item.dataFalta).toLocaleDateString('pt-BR') : 'N/A';
         if (!dataByDate[date]) {
             dataByDate[date] = { justificadas: 0, pendentes: 0 };
@@ -834,12 +757,9 @@ function renderMotivosChart(data) {
     const ctx = document.getElementById('motivosChart');
     if (!ctx) return;
 
-    // Garantir que apenas os últimos 7 dias sejam exibidos
-    const dataFor7Days = filterDataByLast7Days(data);
-
     // Contar ocorrências de cada motivo
     const motivosCont = {};
-    dataFor7Days.forEach(item => {
+    data.forEach(item => {
         const motivo = item.motivo || "Sem informação";
         motivosCont[motivo] = (motivosCont[motivo] || 0) + 1;
     });

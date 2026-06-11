@@ -116,8 +116,7 @@ async function loadFeedbackData() {
             return normalizedItem;
         });
 
-        // Filtrar para os últimos 7 dias por padrão
-        filteredFeedbackData = filterDataByLast7Days(allFeedbackData);
+        filteredFeedbackData = allFeedbackData;
         renderFeedbackTable(filteredFeedbackData);
         updateStats(filteredFeedbackData);
         renderFeedbackChart(filteredFeedbackData);
@@ -194,19 +193,6 @@ function updateStats(data) {
     if (concluidosEl) concluidosEl.textContent = feedbacksConcluidos;
 }
 
-function filterDataByLast7Days(data) {
-    const today = new Date();
-    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
-    today.setHours(23, 59, 59, 999);
-
-    return data.filter(item => {
-        const d = new Date(item.dataFalta);
-        if (isNaN(d.getTime())) return false;
-        return d >= sevenDaysAgo && d <= today;
-    });
-}
-
 function setupEventListeners() {
     // Filtros de período
     const applyBtn = document.getElementById('apply-feedback-filters');
@@ -226,12 +212,7 @@ function setupEventListeners() {
             document.getElementById('feedback-date-start').value = '';
             document.getElementById('feedback-date-end').value = '';
             feedbackPeriodFilters = { startDate: null, endDate: null };
-            // Restaurar filtro de 7 dias ao resetar
-            filteredFeedbackData = filterDataByLast7Days(allFeedbackData);
-            renderFeedbackTable(filteredFeedbackData);
-            updateStats(filteredFeedbackData);
-            renderFeedbackChart(filteredFeedbackData);
-            renderMotivosChart(filteredFeedbackData);
+            applyFilters();
         };
     }
 }
@@ -752,12 +733,9 @@ function renderFeedbackChart(data) {
     const ctx = document.getElementById('feedbackChart');
     if (!ctx) return;
 
-    // Garantir que apenas os últimos 7 dias sejam exibidos
-    const dataFor7Days = filterDataByLast7Days(data);
-
     // Agrupar dados por data
     const dataByDate = {};
-    dataFor7Days.forEach(item => {
+    data.forEach(item => {
         const date = item.dataFalta ? new Date(item.dataFalta).toLocaleDateString('pt-BR') : 'N/A';
         if (!dataByDate[date]) {
             dataByDate[date] = { justificadas: 0, pendentes: 0 };
@@ -834,12 +812,9 @@ function renderMotivosChart(data) {
     const ctx = document.getElementById('motivosChart');
     if (!ctx) return;
 
-    // Garantir que apenas os últimos 7 dias sejam exibidos
-    const dataFor7Days = filterDataByLast7Days(data);
-
     // Contar ocorrências de cada motivo
     const motivosCont = {};
-    dataFor7Days.forEach(item => {
+    data.forEach(item => {
         const motivo = item.motivo || "Sem informação";
         motivosCont[motivo] = (motivosCont[motivo] || 0) + 1;
     });

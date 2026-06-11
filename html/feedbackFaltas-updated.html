@@ -288,7 +288,7 @@
                                             </th>
                                             <th>
                                                 <div class="header-with-filter">
-                                                    Justificativa
+                                                    Observação
                                                 </div>
                                             </th>
                                             <th>
@@ -319,7 +319,7 @@
                                     <tbody id="feedback-table-body">
                                         <!-- Dados serão inseridos via JS futuramente -->
                                         <tr>
-                                            <td colspan="14" style="text-align: center; padding: 20px;">Aguardando carregamento de dados...</td>
+                                            <td colspan="13" style="text-align: center; padding: 20px;">Aguardando carregamento de dados...</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -362,34 +362,20 @@
                         <input type="text" id="feedback-data-falta" class="feedback-input" readonly>
                     </div>
 
-                    <!-- Campo de Motivo com Select -->
                     <div class="feedback-form-group">
-                        <label class="feedback-label">Motivo da Falta <span class="required">*</span></label>
-                        <select id="feedback-motivo-select" class="feedback-select" required>
-                            <option value="" disabled selected>Selecione o motivo</option>
-                            <option value="Atestado médico">Atestado médico</option>
-                            <option value="Atestado de óbito">Atestado de óbito</option>
-                            <option value="Não justificado">Não justificado</option>
-                            <option value="Problemas pessoais">Problemas pessoais</option>
-                            <option value="Licença Gala (Casamento)">Licença Gala (Casamento)</option>
-                            <option value="Doação de Sangue">Doação de Sangue</option>
-                            <option value="Falha de Transporte">Falha de Transporte</option>
-                            <option value="Serviço Militar/Eleitoral">Serviço Militar/Eleitoral</option>
-                            <option value="Acompanhamento familiar">Acompanhamento familiar</option>
-                            <option value="Outros">Outros</option>
-                        </select>
+                        <label class="feedback-label">Motivo da Falta</label>
+                        <input type="text" id="feedback-motivo" class="feedback-input" readonly>
                     </div>
 
-                    <!-- Campo de Texto para "Outros" (Oculto por padrão) -->
-                    <div class="feedback-form-group" id="outros-text-group" style="display: none;">
-                        <label class="feedback-label">Especifique o Motivo <span class="required">*</span></label>
-                        <textarea id="feedback-outros-motivo" class="feedback-textarea" placeholder="Digite o motivo específico..."></textarea>
-                    </div>
-
-                    <!-- Campo de Justificativa -->
+                    <!-- Campos de Resposta -->
                     <div class="feedback-form-group">
                         <label class="feedback-label">Justificativa <span class="required">*</span></label>
                         <textarea id="feedback-justificativa" class="feedback-textarea" placeholder="Digite a justificativa para a falta..." required></textarea>
+                    </div>
+
+                    <div class="feedback-form-group">
+                        <label class="feedback-label">Observações Adicionais</label>
+                        <textarea id="feedback-observacoes" class="feedback-textarea" placeholder="Adicione observações se necessário..."></textarea>
                     </div>
 
                     <!-- Mensagem de Feedback -->
@@ -500,8 +486,7 @@
             }
             
             .feedback-input,
-            .feedback-textarea,
-            .feedback-select {
+            .feedback-textarea {
                 padding: 0.75rem 1rem;
                 background: rgba(15, 23, 42, 0.6);
                 border: 1px solid rgba(56, 189, 248, 0.2);
@@ -511,19 +496,9 @@
                 font-size: 0.9rem;
                 transition: all 0.3s;
             }
-
-            .feedback-select {
-                cursor: pointer;
-            }
-
-            .feedback-select option {
-                background: #1e293b;
-                color: #e0e7ff;
-            }
             
             .feedback-input:focus,
-            .feedback-textarea:focus,
-            .feedback-select:focus {
+            .feedback-textarea:focus {
                 outline: none;
                 border-color: #38bdf8;
                 background: rgba(15, 23, 42, 0.8);
@@ -652,7 +627,7 @@
     <script src="../js/core/menu-controller.js"></script>
     <script src="../js/core/sidebar-user.js"></script>
     <!-- Módulo Específico -->
-    <script src="../js/modules/feedback/main-v2.js"></script>
+    <script src="../js/modules/feedback/main-updated.js"></script>
 </body>
 
 </html>

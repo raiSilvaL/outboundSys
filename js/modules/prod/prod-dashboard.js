@@ -29,10 +29,8 @@ async function loadProdData() {
         // Remove o primeiro item (cabeçalhos)
         const allData = rawData.slice(1);
         
-        // CORREÇÃO: Lógica de filtro mais inteligente
-        // Se a planilha enviar datas de 1899, significa que ela não está enviando a data real, apenas o horário.
-        // Nesse caso, assumimos que os dados são de hoje para não quebrar a exibição dos cards/tabelas.
-        prodData = filterDataByToday(allData);
+        // Filtrar para os últimos 7 dias por padrão
+        prodData = filterDataByLast7Days(allData);
         
         console.log(`Dados carregados: ${prodData.length} registros para hoje.`);
 
@@ -52,6 +50,23 @@ function getTodayDate() {
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+}
+
+function filterDataByLast7Days(data) {
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+    today.setHours(23, 59, 59, 999);
+
+    return data.filter(row => {
+        const dateVal = row.Data || row.Hora;
+        if (!dateVal) return true; // Incluir dados sem data
+
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime()) || d.getFullYear() <= 1900) return true; // Incluir datas inválidas (assumir hoje)
+        
+        return d >= sevenDaysAgo && d <= today;
+    });
 }
 
 function filterDataByToday(data) {
@@ -167,14 +182,16 @@ function renderChart() {
 
     if (prodChart) prodChart.destroy();
 
-    const labels = prodData.map(row => {
+    // Garantir que apenas os últimos 7 dias sejam exibidos
+    const dataFor7Days = filterDataByLast7Days(prodData);
+    const labels = dataFor7Days.map(row => {
         const date = new Date(row.Hora);
         return date.getHours().toString().padStart(2, '0') + ":00";
     });
 
     const datasets = [{
             label: 'Picking',
-            data: prodData.map(row => parseVal(row["Realizado Pit"])),
+            data: dataFor7Days.map(row => parseVal(row["Realizado Pit"])),
             borderColor: '#f97316',
             backgroundColor: 'rgba(249, 115, 22, 0.1)',
             fill: true,
@@ -182,7 +199,7 @@ function renderChart() {
         },
         {
             label: 'Rebin',
-            data: prodData.map(row => parseVal(row["Reallizado Rebin"])),
+            data: dataFor7Days.map(row => parseVal(row["Reallizado Rebin"])),
             borderColor: '#a855f7',
             backgroundColor: 'rgba(168, 85, 247, 0.1)',
             fill: true,
@@ -190,7 +207,7 @@ function renderChart() {
         },
         {
             label: 'Packing',
-            data: prodData.map(row => parseVal(row["Realizado Packing"])),
+            data: dataFor7Days.map(row => parseVal(row["Realizado Packing"])),
             borderColor: '#22c55e',
             backgroundColor: 'rgba(34, 197, 94, 0.1)',
             fill: true,
@@ -198,7 +215,7 @@ function renderChart() {
         },
         {
             label: 'Ship Dock',
-            data: prodData.map(row => parseVal(row["Realizado Ship Dock"])),
+            data: dataFor7Days.map(row => parseVal(row["Realizado Ship Dock"])),
             borderColor: '#0ea5e9',
             backgroundColor: 'rgba(14, 165, 233, 0.1)',
             fill: true,
