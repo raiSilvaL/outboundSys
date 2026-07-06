@@ -11,11 +11,11 @@ class PermissionSystem {
 
     definirPermissoes() {
         return {
-            'PS': ['produtividade'],
-            'PA': ['produtividade'],
-            'Coordenador': ['produtividade', 'feedback-faltas'],
-            'Supervisor': ['produtividade', 'feedback-faltas', 'audit-dashboard'],
-            'Gerente': ['produtividade', 'feedback-faltas', 'audit-dashboard', 'gestao-usuarios'],
+            'PS': ['produtividade', 'controle-dashboard'],
+            'PA': ['produtividade', 'controle-dashboard'],
+            'Coordenador': ['produtividade', 'feedback-faltas', 'controle-dashboard'],
+            'Supervisor': ['produtividade', 'feedback-faltas', 'audit-dashboard', 'controle-dashboard'],
+            'Gerente': ['produtividade', 'feedback-faltas', 'audit-dashboard', 'gestao-usuarios', 'controle-dashboard'],
             'ADM': ['*']
         };
     }
@@ -109,6 +109,11 @@ class PermissionSystem {
                 nome: 'Auditorias por Colaborador',
                 icone: 'fa-users-gear',
                 descricao: 'Auditorias agrupadas por colaborador'
+            },
+            'controle-dashboard': {
+                nome: 'Controle e Infos',
+                icone: 'fa-gauge',
+                descricao: 'Dashboard com dados gerais do outbound'
             },
             'produtividade': {
                 nome: 'Produtividade',

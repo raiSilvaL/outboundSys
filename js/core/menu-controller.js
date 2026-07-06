@@ -8,14 +8,16 @@ const MenuController = {
     
     // Mapeamento de permissões (replicando a lógica da index)
     permissoes: {
+        'controleInfos.html': 'PS', // Todos têm acesso
         'auditHse.html': 'Supervisor',
         'feedbackFaltas.html': 'Coordenador',
         'gestaoUsuarios.html': 'Gerente',
-        'produtividade.html': 'PS' // Todos têm acesso
+        'produtividade.html': 'PS' // Todos tém acesso
     },
 
     // Mapeamento de elementos por módulo
     elementosModulo: {
+        'controleInfos.html': ['.menu-item[href*="controleInfos.html"]', '.menu-group:has(a[href*="controleInfos.html"])', '#controle-parent', '#controle-submenu', '.menu-item:has(.fa-gauge)'],
         'auditHse.html': ['.menu-item[href*="auditHse.html"]', '.menu-group:has(a[href*="auditHse.html"])', '#audit-parent', '#audit-submenu', '.menu-item:has(.fa-clipboard-check)'],
         'feedbackFaltas.html': ['.menu-item[href*="feedbackFaltas.html"]', '.menu-item[data-screen="feedback-main"]', '.menu-item:has(.fa-comments)'],
         'gestaoUsuarios.html': ['.menu-item[href*="gestaoUsuarios.html"]', '.menu-item:has(.fa-users-cog)'],
@@ -68,6 +70,7 @@ const MenuController = {
                     const textoMenu = span.textContent.toLowerCase();
                     // Mapeamento de nomes amigáveis para busca por texto
                     const nomesMap = {
+                        'controleinfos': 'controle e infos',
                         'audithse': 'auditoria hse',
                         'feedbackfaltas': 'feedback de faltas',
                         'gestaousuarios': 'gestão de usuários',
@@ -108,10 +111,13 @@ const MenuController = {
         style.innerHTML = `
             /* Esconde itens de menu que sabemos que precisam de permissão alta por padrão */
             /* Eles serão re-exibidos via JS se o usuário tiver permissão */
+            .menu-item[href*="controleInfos.html"],
             .menu-item[href*="auditHse.html"], 
             .menu-item[href*="gestaoUsuarios.html"],
             .menu-item[href*="feedbackFaltas.html"],
+            .menu-group:has(a[href*="controleInfos.html"]),
             .menu-group:has(a[href*="auditHse.html"]),
+            #controle-parent,
             #audit-parent { 
                 display: none !important; 
             }

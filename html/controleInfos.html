@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outbound System - Controle e Infos</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        /* Estilos adicionais para a página Controle e Infos */
+        .controle-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .controle-header h1 {
+            font-size: 2rem;
+            color: #e0e7ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .controle-header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* Cards de Métricas */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(56, 189, 248, 0.1);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #38bdf8;
+            line-height: 1;
+        }
+
+        .metric-unit {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        /* Seção de Tabelas */
+        .table-section-container {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .table-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        }
+
+        .table-section-header h2 {
+            font-size: 1.2rem;
+            color: #e0e7ff;
+            margin: 0;
+        }
+
+        .table-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .table-filters input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            color: #e0e7ff;
+            font-size: 0.9rem;
+        }
+
+        .table-filters input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+
+        .table-wrapper table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .table-wrapper thead {
+            background: rgba(56, 189, 248, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-wrapper th {
+            padding: 1rem;
+            text-align: left;
+            color: #38bdf8;
+            font-weight: 700;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+            white-space: nowrap;
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .table-wrapper td {
+            padding: 0.8rem 1rem;
+            color: #cbd5e1;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        }
+
+        .table-wrapper tbody tr:hover {
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .table-wrapper tbody tr:nth-child(even) {
+            background: rgba(15, 23, 42, 0.3);
+        }
+
+        /* Coluna Travada */
+        .table-wrapper .sticky-col {
+            position: sticky;
+            left: 0;
+            background: rgba(15, 23, 42, 0.8);
+            z-index: 5;
+            font-weight: 600;
+            color: #38bdf8;
+            min-width: 120px;
+            max-width: 120px;
+            width: 120px;
+        }
+
+        .table-wrapper thead .sticky-col {
+            background: rgba(56, 189, 248, 0.1);
+            z-index: 11;
+        }
+
+        .table-wrapper tbody tr:nth-child(even) .sticky-col {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .table-wrapper tbody tr:hover .sticky-col {
+            background: rgba(56, 189, 248, 0.15);
+        }
+
+        /* Scrollbar customizado */
+        .table-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.3);
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.5);
+        }
+
+        /* Gráfico */
+        .chart-section-container {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-section-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        }
+
+        .chart-section-header h2 {
+            font-size: 1.2rem;
+            color: #e0e7ff;
+            margin: 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 1rem;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            text-align: center;
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(56, 189, 248, 0.2);
+            border-top: 4px solid #38bdf8;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-spinner p {
+            color: #e0e7ff;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Overlay da Animação de Entrada -->
+    <div id="preloader">
+        <div class="brand-container" id="logoText"></div>
+        <div class="subtitle-intro">System</div>
+    </div>
+
+    <!-- Conteúdo Real do Site -->
+    <main id="main-content" class="hidden">
+        <div class="dashboard-wrapper">
+            <!-- Sidebar Retrátil -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h1 class="sidebar-title">
+                        <i class="fas fa-cube"></i>
+                        <a href="../index.html" class="volt-index">Outbound</a>
+                    </h1>
+                    <button class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+                </div>
+
+                <div class="sidebar-section">
+                    <p class="sidebar-label">MÓDULOS</p>
+                    <nav class="sidebar-menu">
+                        <!-- Menu com submenu para Controle e Infos -->
+                        <div class="menu-group">
+                            <a href="#" class="menu-item menu-parent active" id="controle-parent">
+                                <span class="menu-icon"><i class="fas fa-gauge"></i></span>
+                                <span class="menu-text">Controle e Infos</span>
+                                <span class="menu-arrow"><i class="fas fa-chevron-down"></i></span>
+                            </a>
+                            <nav class="submenu active" id="controle-submenu">
+                                <a href="#" class="menu-item submenu-item active" data-screen="controle-dashboard">
+                                    <span class="menu-icon"><i class="fas fa-chart-line"></i></span>
+                                    <span class="menu-text">Dashboard Outbound</span>
+                                </a>
+                                <a href="#" class="menu-item submenu-item" data-screen="headcount">
+                                    <span class="menu-icon"><i class="fas fa-users"></i></span>
+                                    <span class="menu-text">HeadCount</span>
+                                </a>
+                                <a href="#" class="menu-item submenu-item" data-screen="labor">
+                                    <span class="menu-icon"><i class="fas fa-person-hiking"></i></span>
+                                    <span class="menu-text">Labor</span>
+                                </a>
+                                <a href="#" class="menu-item submenu-item" data-screen="tom">
+                                    <span class="menu-icon"><i class="fas fa-truck"></i></span>
+                                    <span class="menu-text">TOM - Transportes</span>
+                                </a>
+                                <a href="#" class="menu-item submenu-item" data-screen="insumos">
+                                    <span class="menu-icon"><i class="fas fa-boxes"></i></span>
+                                    <span class="menu-text">Insumos</span>
+                                </a>
+                            </nav>
+                        </div>
+                        <a href="auditHse.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-clipboard-check"></i></span>
+                            <span class="menu-text">Auditoria HSE</span>
+                        </a>
+                        <a href="produtividade.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-chart-line"></i></span>
+                            <span class="menu-text">Produtividade</span>
+                        </a>
+                        <a href="feedbackFaltas.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-comments"></i></span>
+                            <span class="menu-text">Feedback de Faltas</span>
+                        </a>
+                        <a href="gestaoUsuarios.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-users-cog"></i></span>
+                            <span class="menu-text">Gestão de Usuários</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="sidebar-footer">
+                    <div class="user-card">
+                        <div class="user-avatar" id="sidebar-user-avatar">--</div>
+                        <div class="user-info">
+                            <p class="user-name" id="sidebar-user-name">Usuário</p>
+                            <p class="user-level" id="sidebar-user-level">Nível</p>
+                        </div>
+                        <button id="sidebar-logout" class="user-logout" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="main-wrapper">
+                <!-- Tela: Dashboard Outbound -->
+                <div id="screen-controle-dashboard" class="screen active">
+                    <div class="container">
+                        <!-- Header -->
+                        <section class="controle-header">
+                            <h1>Controle e Informações Operacionais</h1>
+                            <p>Dashboard com dados gerais do outbound, métricas de TPH e DPMO, e série histórica de performance.</p>
+                        </section>
+
+                        <!-- Filtros de Data -->
+                        <section class="filters-section">
+                            <h2>Filtro de Período</h2>
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="date-start">Data Início</label>
+                                    <input type="date" id="date-start" class="filter-input">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="date-end">Data Fim</label>
+                                    <input type="date" id="date-end" class="filter-input">
+                                </div>
+                                <div class="filter-group filter-button-group">
+                                    <button id="apply-filters" class="btn-apply">Aplicar Filtros</button>
+                                    <button id="reset-filters" class="btn-reset">Limpar</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Cards de Métricas Gerais -->
+                        <section class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Forecast</div>
+                                <div class="metric-value" id="metric-forecast">-</div>
+                                <div class="metric-unit">Unidades</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Capacidade IPT</div>
+                                <div class="metric-value" id="metric-capacidade">-</div>
+                                <div class="metric-unit">Unidades</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Drop</div>
+                                <div class="metric-value" id="metric-drop">-</div>
+                                <div class="metric-unit">Unidades</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Expedido</div>
+                                <div class="metric-value" id="metric-expedido">-</div>
+                                <div class="metric-unit">Unidades</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Média TPH OB</div>
+                                <div class="metric-value" id="metric-tph">-</div>
+                                <div class="metric-unit">Unidades/Hora</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Ce Misses</div>
+                                <div class="metric-value" id="metric-cemisses">-</div>
+                                <div class="metric-unit">Ocorrências</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Late Slam</div>
+                                <div class="metric-value" id="metric-lateslam">-</div>
+                                <div class="metric-unit">Ocorrências</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Late Departure</div>
+                                <div class="metric-value" id="metric-latedep">-</div>
+                                <div class="metric-unit">Ocorrências</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Late Departure (TOM)</div>
+                                <div class="metric-value" id="metric-latetom">-</div>
+                                <div class="metric-unit">Ocorrências</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Late Position</div>
+                                <div class="metric-value" id="metric-latepos">-</div>
+                                <div class="metric-unit">Ocorrências</div>
+                            </div>
+                        </section>
+
+                        <!-- Tabela TPH -->
+                        <section class="table-section-container">
+                            <div class="table-section-header">
+                                <h2>TPH por Atividade</h2>
+                            </div>
+                            <div class="table-wrapper">
+                                <table id="tph-table">
+                                    <thead>
+                                        <tr id="tph-header-row">
+                                            <th class="sticky-col">Atividade</th>
+                                            <th data-day="0">Dom.</th>
+                                            <th data-day="1">Seg.</th>
+                                            <th data-day="2">Ter.</th>
+                                            <th data-day="3">Qua.</th>
+                                            <th data-day="4">Qui.</th>
+                                            <th data-day="5">Sex.</th>
+                                            <th data-day="6">Sáb.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tph-body">
+                                        <tr>
+                                            <td class="sticky-col">Pick</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sticky-col">Rebin</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sticky-col">Pack</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sticky-col">Dock</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Tabela DPMO -->
+                        <section class="table-section-container">
+                            <div class="table-section-header">
+                                <h2>DPMO por Atividade</h2>
+                            </div>
+                            <div class="table-wrapper">
+                                <table id="dpmo-table">
+                                    <thead>
+                                        <tr id="dpmo-header-row">
+                                            <th class="sticky-col">Atividade</th>
+                                            <th data-day="0">Dom.</th>
+                                            <th data-day="1">Seg.</th>
+                                            <th data-day="2">Ter.</th>
+                                            <th data-day="3">Qua.</th>
+                                            <th data-day="4">Qui.</th>
+                                            <th data-day="5">Sex.</th>
+                                            <th data-day="6">Sáb.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dpmo-body">
+                                        <tr>
+                                            <td class="sticky-col">Pick Short</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sticky-col">Sort</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sticky-col">Pack</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sticky-col">Ship</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Gráfico de Volume -->
+                        <section class="chart-section-container">
+                            <div class="chart-section-header">
+                                <h2>Volume - Capacidade, Forecast e Expedido</h2>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="volumeChart"></canvas>
+                            </div>
+                        </section>
+
+                        <!-- Gráfico de Perda -->
+                        <section class="chart-section-container">
+                            <div class="chart-section-header">
+                                <h2>Perda - Ce Misses, Late Slam e Late Departure</h2>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="perdaChart"></canvas>
+                            </div>
+                        </section>
+
+                        <!-- Loading Spinner -->
+                        <div id="loading-spinner" class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p id="loading-text">Carregando dados...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tela: HeadCount (Vazia) -->
+                <div id="screen-headcount" class="screen">
+                    <div class="container">
+                        <section class="controle-header">
+                            <h1>HeadCount</h1>
+                            <p>Gestão de recursos humanos e alocação de pessoal.</p>
+                        </section>
+                        <div style="text-align: center; padding: 3rem; color: #94a3b8;">
+                            <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; display: block; color: #38bdf8;"></i>
+                            <p>Página em desenvolvimento</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tela: Labor (Vazia) -->
+                <div id="screen-labor" class="screen">
+                    <div class="container">
+                        <section class="controle-header">
+                            <h1>Labor</h1>
+                            <p>Análise de produtividade e eficiência de mão de obra.</p>
+                        </section>
+                        <div style="text-align: center; padding: 3rem; color: #94a3b8;">
+                            <i class="fas fa-person-hiking" style="font-size: 3rem; margin-bottom: 1rem; display: block; color: #38bdf8;"></i>
+                            <p>Página em desenvolvimento</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tela: TOM (Vazia) -->
+                <div id="screen-tom" class="screen">
+                    <div class="container">
+                        <section class="controle-header">
+                            <h1>TOM - Transportes</h1>
+                            <p>Gestão e controle de transportes e logística.</p>
+                        </section>
+                        <div style="text-align: center; padding: 3rem; color: #94a3b8;">
+                            <i class="fas fa-truck" style="font-size: 3rem; margin-bottom: 1rem; display: block; color: #38bdf8;"></i>
+                            <p>Página em desenvolvimento</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tela: Insumos (Vazia) -->
+                <div id="screen-insumos" class="screen">
+                    <div class="container">
+                        <section class="controle-header">
+                            <h1>Insumos</h1>
+                            <p>Controle de materiais, suprimentos e insumos operacionais.</p>
+                        </section>
+                        <div style="text-align: center; padding: 3rem; color: #94a3b8;">
+                            <i class="fas fa-boxes" style="font-size: 3rem; margin-bottom: 1rem; display: block; color: #38bdf8;"></i>
+                            <p>Página em desenvolvimento</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/core/animation.js"></script>
+    <script src="../js/core/auth.js"></script>
+    <script src="../js/core/permissions.js"></script>
+    <script src="../js/core/menu-controller.js"></script>
+    <script src="../js/core/ui-controller.js"></script>
+    <script src="../js/core/utils.js"></script>
+    <script src="../js/core/sidebar-user.js"></script>
+    <script src="../js/modules/controle/main.js"></script>
+</body>
+
+</html>

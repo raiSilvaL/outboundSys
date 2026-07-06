@@ -576,6 +576,184 @@ body {
 }
 
 
+/* Cabeçalho da tela Controle e Infos */
+
+.controle-header {
+    margin-bottom: 2rem;
+    flex-shrink: 0;
+}
+
+.controle-header h1 {
+    font-size: 2rem;
+    color: #e0e7ff;
+    margin-bottom: 0.5rem;
+}
+
+.controle-header p {
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+
+/* Cards de Métricas Gerais (Controle e Infos) */
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, auto);
+    grid-auto-flow: row;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 992px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: none;
+        grid-auto-flow: row;
+    }
+}
+
+@media (max-width: 480px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.metric-card {
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.metric-card:hover {
+    border-color: #38bdf8;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(56, 189, 248, 0.1);
+    background: rgba(30, 41, 59, 0.7);
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #38bdf8;
+    margin-bottom: 0.25rem;
+}
+
+.metric-unit {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+/* Seções de Tabela (TPH / DPMO) - Controle e Infos */
+
+.table-section-container {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    flex-shrink: 0;
+}
+
+.table-section-header {
+    margin-bottom: 1.5rem;
+}
+
+.table-section-header h2 {
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+#tph-table,
+#dpmo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+#tph-table th,
+#dpmo-table th {
+    background: rgba(15, 23, 42, 0.8);
+    color: #38bdf8;
+    padding: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+    white-space: nowrap;
+}
+
+#tph-table td,
+#dpmo-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+    color: #cbd5e1;
+    white-space: nowrap;
+}
+
+#tph-table tr:hover,
+#dpmo-table tr:hover {
+    background: rgba(56, 189, 248, 0.05);
+}
+
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background: rgba(15, 23, 42, 0.95);
+    font-weight: 600;
+    color: #e0e7ff;
+    z-index: 1;
+}
+
+#tph-table th.sticky-col,
+#dpmo-table th.sticky-col {
+    z-index: 2;
+}
+
+
+/* Seção de Gráfico Histórico - Controle e Infos */
+
+.chart-section-container {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    flex-shrink: 0;
+}
+
+.chart-section-header {
+    margin-bottom: 1.5rem;
+}
+
+.chart-section-header h2 {
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+
 /* Seção de Estatísticas */
 
 .stats-section h1 {
@@ -833,8 +1011,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 14, 39, 0.8);
-    backdrop-filter: blur(5px);
+    background: rgba(10, 14, 39, 0.95);
+    backdrop-filter: blur(8px);
     display: none;
     flex-direction: column;
     justify-content: center;
@@ -842,22 +1020,42 @@ body {
     z-index: 9999;
 }
 
+.loading-spinner.active {
+    display: flex !important;
+}
+
 .spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(56, 189, 248, 0.1);
-    border-top: 5px solid #38bdf8;
+    width: 60px;
+    height: 60px;
+    border: 6px solid rgba(56, 189, 248, 0.15);
+    border-top: 6px solid #38bdf8;
+    border-right: 6px solid rgba(139, 92, 246, 0.6);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
+    animation: spin 1.2s linear infinite;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+#loading-text {
+    color: #e0e7ff;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-top: 1rem;
 }
 
 @keyframes spin {
     0% {
         transform: rotate(0deg);
     }
+    50% {
+        border-top: 6px solid #38bdf8;
+        border-right: 6px solid rgba(139, 92, 246, 0.8);
+    }
     100% {
         transform: rotate(360deg);
+        border-top: 6px solid rgba(139, 92, 246, 0.6);
+        border-right: 6px solid #38bdf8;
     }
 }
 

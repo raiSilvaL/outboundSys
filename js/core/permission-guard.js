@@ -17,7 +17,8 @@ class PermissionGuard {
             'auditHse.html': ['Supervisor', 'Gerente', 'ADM'],
             'feedbackFaltas.html': ['Coordenador', 'Supervisor', 'Gerente', 'ADM'],
             'gestaoUsuarios.html': ['Gerente', 'ADM'],
-            'produtividade.html': ['PS', 'PA', 'Coordenador', 'Supervisor', 'Gerente', 'ADM']
+            'produtividade.html': ['PS', 'PA', 'Coordenador', 'Supervisor', 'Gerente', 'ADM'],
+            'controleInfos.html': ['PS', 'PA', 'Coordenador', 'Supervisor', 'Gerente', 'ADM']
         };
     }
 
@@ -30,7 +31,8 @@ class PermissionGuard {
             'audit-collaborator': ['Supervisor', 'Gerente', 'ADM'],
             'feedback-faltas': ['Coordenador', 'Supervisor', 'Gerente', 'ADM'],
             'produtividade': ['PS', 'PA', 'Coordenador', 'Supervisor', 'Gerente', 'ADM'],
-            'gestao-usuarios': ['Gerente', 'ADM']
+            'gestao-usuarios': ['Gerente', 'ADM'],
+            'controle-dashboard': ['PS', 'PA', 'Coordenador', 'Supervisor', 'Gerente', 'ADM']
         };
     }
 
