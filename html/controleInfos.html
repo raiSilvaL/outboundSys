@@ -603,16 +603,358 @@
                     </div>
                 </div>
 
-                <!-- Tela: HeadCount (Vazia) -->
+                <!-- Tela: HeadCount -->
                 <div id="screen-headcount" class="screen">
                     <div class="container">
+                        <!-- Header -->
                         <section class="controle-header">
                             <h1>HeadCount</h1>
-                            <p>Gestão de recursos humanos e alocação de pessoal.</p>
+                            <p>Gestão de recursos humanos, alocação de pessoal e controle de documentação.</p>
                         </section>
-                        <div style="text-align: center; padding: 3rem; color: #94a3b8;">
-                            <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; display: block; color: #38bdf8;"></i>
-                            <p>Página em desenvolvimento</p>
+
+                        <!-- Abas de Navegação -->
+                        <section class="headcount-tabs">
+                            <div class="tabs-navigation">
+                                <button class="tab-button active" data-tab="quadro">
+                                    <i class="fas fa-chart-bar"></i> Quadro
+                                </button>
+                                <button class="tab-button" data-tab="operadores">
+                                    <i class="fas fa-users"></i> Operadores
+                                </button>
+                            </div>
+                        </section>
+
+                        <!-- Aba: Quadro -->
+                        <section id="tab-quadro" class="tab-content active">
+                            <!-- Cards de Resumo do Quadro -->
+                            <div class="metrics-grid" id="quadro-cards">
+                                <div class="metric-card">
+                                    <span class="metric-label">HC Atual (Total)</span>
+                                    <span class="metric-value" id="metric-hc-total">-</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-label">Assistentes Ativos</span>
+                                    <span class="metric-value" id="metric-assistentes">-</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-label">Operadores Ativos</span>
+                                    <span class="metric-value" id="metric-operadores">-</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-label">Operadores Spot</span>
+                                    <span class="metric-value" id="metric-spot">-</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-label">NRs Vencidas</span>
+                                    <span class="metric-value" id="metric-nrs-vencidas" style="color: #ef4444;">-</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-label">ASOs Vencidas</span>
+                                    <span class="metric-value" id="metric-asos-vencidas" style="color: #ef4444;">-</span>
+                                </div>
+                            </div>
+
+                            <!-- Tabela Quadro por Turno -->
+                            <section class="table-section-container">
+                                <div class="table-section-header">
+                                    <h2>Quadro Atual por Turno</h2>
+                                </div>
+                                <div class="table-wrapper">
+                                    <table id="quadro-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="sticky-col">Departamento</th>
+                                                <th>Turno</th>
+                                                <th>HC Total</th>
+                                                <th>Coordenador</th>
+                                                <th>Líder</th>
+                                                <th>P.A</th>
+                                                <th>Asst. Ativos</th>
+                                                <th>Asst. AF/AB</th>
+                                                <th>Asst. Externo</th>
+                                                <th>Asst. Férias</th>
+                                                <th>P.S</th>
+                                                <th>Op. Ativos</th>
+                                                <th>Op. Spot</th>
+                                                <th>Op. AF/AB</th>
+                                                <th>Op. Externo</th>
+                                                <th>Op. Férias</th>
+                                                <th>NR Vencida</th>
+                                                <th>ASO Vencido</th>
+                                                <th>Reci. Pendente</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="quadro-body">
+                                            <tr>
+                                                <td class="sticky-col">-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                                <td>-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        </section>
+
+                        <!-- Aba: Operadores -->
+                        <section id="tab-operadores" class="tab-content">
+                            <!-- Sub-abas de Operadores -->
+                            <div class="sub-tabs-navigation">
+                                <button class="sub-tab-button active" data-subtab="nrs-aso">
+                                    <i class="fas fa-id-card"></i> NRs e ASO
+                                </button>
+                                <button class="sub-tab-button" data-subtab="spot">
+                                    <i class="fas fa-briefcase"></i> Spot
+                                </button>
+                                <button class="sub-tab-button" data-subtab="reciclagem">
+                                    <i class="fas fa-sync"></i> Reciclagens Pendentes
+                                </button>
+                            </div>
+
+                            <!-- Sub-aba: NRs e ASO -->
+                            <div id="subtab-nrs-aso" class="sub-tab-content active">
+                                <!-- Cards de Resumo NRs e ASO -->
+                                <div class="metrics-grid">
+                                    <div class="metric-card">
+                                        <span class="metric-label">Qtd Operadores</span>
+                                        <span class="metric-value" id="metric-ops-nrs-total">-</span>
+                                    </div>
+                                    <div class="metric-card">
+                                        <span class="metric-label">NRs Vencidas</span>
+                                        <span class="metric-value" id="metric-nrs-vencidas-ops" style="color: #ef4444;">-</span>
+                                    </div>
+                                    <div class="metric-card">
+                                        <span class="metric-label">ASOs Sem Dado</span>
+                                        <span class="metric-value" id="metric-asos-sem-dado" style="color: #f59e0b;">-</span>
+                                    </div>
+                                    <div class="metric-card">
+                                        <span class="metric-label">ASOs Vencendo</span>
+                                        <span class="metric-value" id="metric-asos-vencendo" style="color: #f59e0b;">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- Tabela NRs e ASO -->
+                                <section class="table-section-container">
+                                    <div class="table-section-header">
+                                        <h2>Operadores - NRs e ASO</h2>
+                                        <div class="table-filters">
+                                            <input type="text" id="filter-nrs-aso" placeholder="Buscar por nome...">
+                                        </div>
+                                    </div>
+                                    <div class="table-wrapper">
+                                        <table id="nrs-aso-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="sticky-col">#</th>
+                                                    <th>Nome</th>
+                                                    <th>Tipo</th>
+                                                    <th>Função</th>
+                                                    <th>Situação</th>
+                                                    <th>Setor</th>
+                                                    <th>Status ASO</th>
+                                                    <th>Status NRs</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="nrs-aso-body">
+                                                <tr>
+                                                    <td class="sticky-col">-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <!-- Sub-aba: Spot -->
+                            <div id="subtab-spot" class="sub-tab-content">
+                                <!-- Cards de Resumo Spot -->
+                                <div class="metrics-grid">
+                                    <div class="metric-card">
+                                        <span class="metric-label">Spot OB</span>
+                                        <span class="metric-value" id="metric-spot-ob">-</span>
+                                    </div>
+                                    <div class="metric-card">
+                                        <span class="metric-label">Spot Transfer</span>
+                                        <span class="metric-value" id="metric-spot-transfer">-</span>
+                                    </div>
+                                    <div class="metric-card">
+                                        <span class="metric-label">Em Reciclagem</span>
+                                        <span class="metric-value" id="metric-spot-reciclagem" style="color: #f59e0b;">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- Gráficos Spot -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                                    <section class="chart-section-container">
+                                        <div class="chart-section-header">
+                                            <h2>Distribuição por Turno</h2>
+                                        </div>
+                                        <div class="chart-container">
+                                            <canvas id="spotTurnoChart"></canvas>
+                                        </div>
+                                    </section>
+                                    <section class="chart-section-container">
+                                        <div class="chart-section-header">
+                                            <h2>Distribuição por Base/Site</h2>
+                                        </div>
+                                        <div class="chart-container">
+                                            <canvas id="spotBaseChart"></canvas>
+                                        </div>
+                                    </section>
+                                </div>
+
+                                <!-- Tabela Spot -->
+                                <section class="table-section-container">
+                                    <div class="table-section-header">
+                                        <h2>Operadores Spot</h2>
+                                        <div class="table-filters">
+                                            <input type="text" id="filter-spot" placeholder="Buscar por nome...">
+                                        </div>
+                                    </div>
+                                    <div class="table-wrapper">
+                                        <table id="spot-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="sticky-col">#</th>
+                                                    <th>Nome</th>
+                                                    <th>Turno</th>
+                                                    <th>Departamento</th>
+                                                    <th>Função</th>
+                                                    <th>Nível</th>
+                                                    <th>Setor</th>
+                                                    <th>Base/Site</th>
+                                                    <th>Em Reciclagem</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="spot-body">
+                                                <tr>
+                                                    <td class="sticky-col">-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <!-- Sub-aba: Reciclagens Pendentes -->
+                            <div id="subtab-reciclagem" class="sub-tab-content">
+                                <!-- Cards de Resumo Reciclagem -->
+                                <div class="metrics-grid">
+                                    <div class="metric-card">
+                                        <span class="metric-label">Reciclagens Pendentes</span>
+                                        <span class="metric-value" id="metric-reciclagem-pendentes" style="color: #f59e0b;">-</span>
+                                    </div>
+                                </div>
+
+                                <!-- Tabela Reciclagens Pendentes -->
+                                <section class="table-section-container">
+                                    <div class="table-section-header">
+                                        <h2>Reciclagens Pendentes (Ordenadas por Data)</h2>
+                                        <div class="table-filters">
+                                            <input type="text" id="filter-reciclagem" placeholder="Buscar por nome...">
+                                        </div>
+                                    </div>
+                                    <div class="table-wrapper">
+                                        <table id="reciclagem-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="sticky-col">Status</th>
+                                                    <th>Nome</th>
+                                                    <th>Tipo Solicitação</th>
+                                                    <th>Turno</th>
+                                                    <th>Tipo de Máquina</th>
+                                                    <th>Data Ocorrência</th>
+                                                    <th>Liberado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="reciclagem-body">
+                                                <tr>
+                                                    <td class="sticky-col">-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            </div>
+                        </section>
+
+                        <!-- Modal de Detalhes Reciclagem -->
+                        <div id="reciclagem-modal" class="modal-overlay" style="display: none;">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2>Detalhes da Reciclagem</h2>
+                                    <button class="modal-close" id="close-reciclagem-modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="modal-field">
+                                        <label>Nome do Funcionário:</label>
+                                        <p id="modal-reciclagem-nome">-</p>
+                                    </div>
+                                    <div class="modal-field">
+                                        <label>Local:</label>
+                                        <p id="modal-reciclagem-local">-</p>
+                                    </div>
+                                    <div class="modal-field">
+                                        <label>AXYMA Aplicado:</label>
+                                        <p id="modal-reciclagem-axyma">-</p>
+                                    </div>
+                                    <div class="modal-field">
+                                        <label>Motivo Não Liberação:</label>
+                                        <p id="modal-reciclagem-motivo">-</p>
+                                    </div>
+                                    <div class="modal-field">
+                                        <label>Observações:</label>
+                                        <p id="modal-reciclagem-obs">-</p>
+                                    </div>
+                                    <div class="modal-field">
+                                        <label>Data Prevista para Devolutiva:</label>
+                                        <p id="modal-reciclagem-data-prevista">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading Spinner -->
+                        <div id="loading-spinner-headcount" class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p id="loading-text-headcount">Carregando dados...</p>
                         </div>
                     </div>
                 </div>
@@ -671,6 +1013,59 @@
     <script src="../js/core/utils.js"></script>
     <script src="../js/core/sidebar-user.js"></script>
     <script src="../js/modules/controle/main.js"></script>
+    <script src="../js/modules/controle/headcount.js"></script>
+    <script>
+        // Inicializar HeadCount quando a tela for acessada
+        let headcountModule = null;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // O módulo Controle só fica disponível em window.controleModuleInstance
+            // depois que a animação de intro termina (~3s após o load, ou 5s de
+            // fallback). Por isso não basta checar uma única vez logo no início:
+            // fazemos polling até o módulo existir (ou desistimos após um tempo
+            // razoável, registrando um erro claro).
+            let tentativas = 0;
+            const maxTentativas = 100; // 100 x 100ms = até 10s de espera
+
+            const tentarInterceptar = () => {
+                tentativas++;
+
+                if (window.controleModuleInstance && window.controleModuleInstance.switchScreen) {
+                    // Evita interceptar duas vezes caso a função rode mais de uma vez
+                    if (window.controleModuleInstance.switchScreen.__headcountPatched) {
+                        return;
+                    }
+
+                    const originalSwitchScreen = window.controleModuleInstance.switchScreen.bind(window.controleModuleInstance);
+
+                    const patchedSwitchScreen = function(screenId) {
+                        // Chamar o método original
+                        originalSwitchScreen(screenId);
+
+                        // Inicializar HeadCount quando a tela for acessada
+                        if (screenId === 'headcount') {
+                            if (!headcountModule) {
+                                console.log('Inicializando módulo HeadCount...');
+                                headcountModule = new HeadCountModule();
+                            } else {
+                                console.log('Módulo HeadCount já foi inicializado');
+                            }
+                        }
+                    };
+                    patchedSwitchScreen.__headcountPatched = true;
+
+                    window.controleModuleInstance.switchScreen = patchedSwitchScreen;
+                    console.log('Interceptação do switchScreen (HeadCount) configurada com sucesso.');
+                } else if (tentativas < maxTentativas) {
+                    setTimeout(tentarInterceptar, 100);
+                } else {
+                    console.error('Não foi possível inicializar o módulo HeadCount: o módulo Controle não ficou disponível a tempo.');
+                }
+            };
+
+            tentarInterceptar();
+        });
+    </script>
 </body>
 
 </html>

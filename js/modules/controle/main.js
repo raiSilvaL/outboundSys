@@ -786,6 +786,9 @@ class ControleInfosModule {
     }
 }
 
+// Expor a classe globalmente para que scripts inline possam acessá-la
+window.ControleInfosModule = ControleInfosModule;
+
 // Inicializar módulo quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof auth === 'undefined' || !auth.estaAutenticado()) {
@@ -811,7 +814,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Inicializar módulo Controle e Infos
-        new ControleInfosModule();
+        const controleModule = new ControleInfosModule();
+        window.controleModuleInstance = controleModule;
     };
 
     // Ouvir o evento de intro finalizado
