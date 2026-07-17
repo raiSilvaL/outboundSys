@@ -719,7 +719,7 @@ body {
 .sticky-col {
     position: sticky;
     left: 0;
-    background: rgba(15, 23, 42, 0.95);
+    background: #0f172a;
     font-weight: 600;
     color: #e0e7ff;
     z-index: 1;
@@ -791,6 +791,25 @@ body {
 #spot-table th.sticky-col,
 #reciclagem-table th.sticky-col {
     z-index: 2;
+    background: #0f172a;
+}
+
+/* Coluna "Departamento" mesclada (rowspan) na tabela Quadro Atual por Turno:
+   mais larga para o texto (ex.: "Outbound") não vazar, e conteúdo
+   centralizado verticalmente já que a célula ocupa várias linhas. */
+#quadro-table td.dept-merged-cell {
+    min-width: 160px;
+    width: 160px;
+    white-space: normal;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+#quadro-table th.sticky-col:first-child {
+    min-width: 160px;
+    width: 160px;
 }
 
 

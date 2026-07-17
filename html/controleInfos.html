@@ -170,7 +170,7 @@
         .table-wrapper .sticky-col {
             position: sticky;
             left: 0;
-            background: rgba(15, 23, 42, 0.8);
+            background: #0f172a;
             z-index: 5;
             font-weight: 600;
             color: #38bdf8;
@@ -180,16 +180,16 @@
         }
 
         .table-wrapper thead .sticky-col {
-            background: rgba(56, 189, 248, 0.1);
+            background: #16283f;
             z-index: 11;
         }
 
         .table-wrapper tbody tr:nth-child(even) .sticky-col {
-            background: rgba(15, 23, 42, 0.9);
+            background: #131f34;
         }
 
         .table-wrapper tbody tr:hover .sticky-col {
-            background: rgba(56, 189, 248, 0.15);
+            background: #1c2f4a;
         }
 
         /* Scrollbar customizado */
@@ -763,12 +763,12 @@
                                                 <tr>
                                                     <th class="sticky-col">#</th>
                                                     <th>Nome</th>
-                                                    <th>Tipo</th>
-                                                    <th>Função</th>
-                                                    <th>Situação</th>
-                                                    <th>Setor</th>
-                                                    <th>Status ASO</th>
-                                                    <th>Status NRs</th>
+                                                    <th data-filter-col="tipo">Tipo</th>
+                                                    <th data-filter-col="funcao">Função</th>
+                                                    <th data-filter-col="situacao">Situação</th>
+                                                    <th data-filter-col="setor">Setor</th>
+                                                    <th data-filter-col="statusAso">Status ASO</th>
+                                                    <th data-filter-col="statusNrs">Status NRs</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="nrs-aso-body">
@@ -840,13 +840,13 @@
                                                 <tr>
                                                     <th class="sticky-col">#</th>
                                                     <th>Nome</th>
-                                                    <th>Turno</th>
-                                                    <th>Departamento</th>
-                                                    <th>Função</th>
-                                                    <th>Nível</th>
-                                                    <th>Setor</th>
-                                                    <th>Base/Site</th>
-                                                    <th>Em Reciclagem</th>
+                                                    <th data-filter-col="turno">Turno</th>
+                                                    <th data-filter-col="departamento">Departamento</th>
+                                                    <th data-filter-col="funcao">Função</th>
+                                                    <th data-filter-col="nivel">Nível</th>
+                                                    <th data-filter-col="setor">Setor</th>
+                                                    <th data-filter-col="baseSite">Base/Site</th>
+                                                    <th data-filter-col="emReciclagem">Em Reciclagem</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="spot-body">
@@ -891,9 +891,9 @@
                                                 <tr>
                                                     <th class="sticky-col">Status</th>
                                                     <th>Nome</th>
-                                                    <th>Tipo Solicitação</th>
-                                                    <th>Turno</th>
-                                                    <th>Tipo de Máquina</th>
+                                                    <th data-filter-col="tipoSolicitacao">Tipo Solicitação</th>
+                                                    <th data-filter-col="turno">Turno</th>
+                                                    <th data-filter-col="tipoMaquina">Tipo de Máquina</th>
                                                     <th>Data Ocorrência</th>
                                                     <th>Liberado</th>
                                                 </tr>
