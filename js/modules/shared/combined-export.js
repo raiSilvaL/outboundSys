@@ -352,7 +352,11 @@ async function exportConsolidatedExcel() {
             }
             const totalHse = dayKeys.reduce((sum, day) => sum + (hseDay[day] || 0), 0);
             const totalApollo = dayKeys.reduce((sum, day) => sum + (apolloDay[day] || 0), 0);
-            const validDaysForPerson = dayKeys.filter(day => Object.prototype.hasOwnProperty.call(hseDay, day) || Object.prototype.hasOwnProperty.call(apolloDay, day)).length;
+            // A base de colaboradores contém uma coluna por dia, inclusive com
+            // valor zero. A regra dos módulos individuais conta essas datas para
+            // a meta; não devemos usar somente os dias que tiveram auditoria.
+            const personDateKeys = Object.keys(person).map(key => dateKeyOf(key, '')).filter(Boolean);
+            const validDaysForPerson = dayKeys.filter(day => personDateKeys.includes(day)).length;
             const hseMeta = validDaysForPerson * 3;
             const apolloMeta = validDaysForPerson * 5;
             if (source === 'HSE') { row['Total HSE'] = totalHse; row['Meta HSE'] = hseMeta; row['Status HSE'] = validDaysForPerson <= 0 ? 'Não fez' : totalHse >= hseMeta ? 'Meta Atingida' : totalHse > 0 ? 'Meta Não Atingida' : 'Não fez'; }
