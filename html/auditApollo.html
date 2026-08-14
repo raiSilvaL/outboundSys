@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outbound System - Auditoria HSE</title>
+    <title>Outbound System - Auditoria Apollo</title>
     <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
     <link rel="stylesheet" href="../css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
@@ -67,20 +67,29 @@
                                 </a>
                             </nav>
                         </div>
-                        <!-- Menu individual Auditoria HSE -->
+                        <a href="auditHse.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-clipboard-check"></i></span>
+                            <span class="menu-text">Auditoria HSE</span>
+                        </a>
+                        <!-- Menu com submenu para Auditoria Apollo -->
                         <div class="menu-group">
-                            <a href="#" class="menu-item menu-parent active" id="audit-parent">
-                                <span class="menu-icon"><i class="fas fa-clipboard-check"></i></span>
-                                <span class="menu-text">Auditoria HSE</span>
+                            <a href="#" class="menu-item menu-parent active" id="apollo-parent">
+                                <span class="menu-icon"><i class="fas fa-rocket"></i></span>
+                                <span class="menu-text">Auditoria Apollo</span>
                                 <span class="menu-arrow"><i class="fas fa-chevron-down"></i></span>
                             </a>
-                            <nav class="submenu active" id="audit-submenu">
-                                <a href="#" class="menu-item submenu-item active" data-screen="audit-dashboard"><span class="menu-icon"><i class="fas fa-chart-pie"></i></span><span class="menu-text">Dashboard Geral</span></a>
-                                <a href="#" class="menu-item submenu-item" data-screen="audit-collaborator"><span class="menu-icon"><i class="fas fa-users-gear"></i></span><span class="menu-text">Auditorias por Colaborador</span></a>
+                            <nav class="submenu active" id="apollo-submenu">
+                                <a href="#" class="menu-item submenu-item active" data-screen="apollo-dashboard">
+                                    <span class="menu-icon"><i class="fas fa-chart-pie"></i></span>
+                                    <span class="menu-text">Dashboard Geral</span>
+                                </a>
+                                <a href="#" class="menu-item submenu-item" data-screen="apollo-collaborator">
+                                    <span class="menu-icon"><i class="fas fa-users-gear"></i></span>
+                                    <span class="menu-text">Auditorias por Colaborador</span>
+                                </a>
                                 <a href="consolidado.html" class="menu-item submenu-item"><span class="menu-icon"><i class="fas fa-chart-column"></i></span><span class="menu-text">Consolidado HSE + Apollo</span></a>
                             </nav>
                         </div>
-                        <a href="auditApollo.html" class="menu-item"><span class="menu-icon"><i class="fas fa-rocket"></i></span><span class="menu-text">Auditoria Apollo</span></a>
                         <a href="produtividade.html" class="menu-item">
                             <span class="menu-icon"><i class="fas fa-chart-line"></i></span>
                             <span class="menu-text">Produtividade</span>
@@ -122,7 +131,7 @@
             <!-- Main Content -->
             <div class="main-wrapper">
                 <!-- Tela: Dashboard Geral de Auditoria HSE -->
-                <div id="screen-audit-dashboard" class="screen active">
+                <div id="screen-apollo-dashboard" class="screen active">
                     <div class="container">
                         <!-- Filtros Gerais -->
                         <section class="filters-section">
@@ -151,23 +160,23 @@
 
                         <!-- Estatísticas -->
                         <section class="stats-section">
-                            <h1>Dashboard de Auditorias HSE</h1>
+                            <h1>Dashboard de Auditorias Apollo</h1>
                             <div class="stats-grid">
                                 <div class="stat-card">
                                     <div class="stat-value" id="total-audits">-</div>
                                     <div class="stat-label">Total de Auditorias</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div class="stat-value" id="avg-score">-</div>
-                                    <div class="stat-label">Score Médio</div>
+                                    <div class="stat-value" id="total-types">-</div>
+                                    <div class="stat-label">Tipos de Auditoria</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-value" id="total-departments">-</div>
                                     <div class="stat-label">Departamentos</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div class="stat-value" id="conformities">-</div>
-                                    <div class="stat-label">Conformidades</div>
+                                    <div class="stat-value" id="total-areas">-</div>
+                                    <div class="stat-label">Áreas Auditoras</div>
                                 </div>
                             </div>
                         </section>
@@ -176,6 +185,14 @@
                         <section class="content-carousel-section">
                             <div class="carousel-header">
                                 <h2 id="carousel-title">Visão Geral (Gráfico)</h2>
+                                <div class="export-buttons-container">
+                                    <button id="export-apollo-excel-btn" class="export-btn export-btn-excel" title="Exportar Auditorias para Excel" aria-label="Exportar Auditorias para Excel">
+                                        📊
+                                    </button>
+                                    <button id="export-apollo-csv-btn" class="export-btn export-btn-csv" title="Exportar Auditorias para CSV" aria-label="Exportar Auditorias para CSV">
+                                        📄
+                                    </button>
+                                </div>
                                 <div class="carousel-controls">
                                     <button id="carousel-prev" class="carousel-btn">◀</button>
                                     <button id="carousel-next" class="carousel-btn">▶</button>
@@ -195,12 +212,12 @@
                                             <table class="audits-table">
                                                 <thead>
                                                     <tr>
+                                                        <th>Warehouse</th>
                                                         <th>Departamento</th>
-                                                        <th>Usuário</th>
-                                                        <th>Formulário</th>
-                                                        <th>Score</th>
-                                                        <th>Conf.</th>
-                                                        <th>Não Conf.</th>
+                                                        <th>Nome</th>
+                                                        <th>Função</th>
+                                                        <th>Tipo Auditoria</th>
+                                                        <th>Data</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="table-body"></tbody>
@@ -225,7 +242,7 @@
                 </div>
 
                 <!-- Tela: Auditorias por Colaborador -->
-                <div id="screen-audit-collaborator" class="screen">
+                <div id="screen-apollo-collaborator" class="screen">
                     <div class="container">
                         <!-- Título da Seção -->
                         <section class="stats-section">
@@ -384,14 +401,14 @@
     <script src="../js/core/menu-controller.js"></script>
     <script src="../js/core/sidebar-user.js"></script>
     
-    <!-- Scripts Módulo Audit -->
-    <script src="../js/modules/audit/audit-dashboard.js"></script>
-    <script src="../js/modules/audit/audit-collaborators.js"></script>
-    <script src="../js/modules/audit/audit-export.js"></script>
-    <script src="../js/modules/audit/report-engine.js"></script>
-    <script src="../js/modules/audit/audit-report.js"></script>
+    <!-- Scripts Módulo Apollo -->
+    <script src="../js/modules/apollo/apollo-dashboard.js"></script>
+    <script src="../js/modules/apollo/apollo-collaborators.js"></script>
+    <script src="../js/modules/apollo/apollo-export.js"></script>
+    <script src="../js/modules/apollo/report-engine.js"></script>
+    <script src="../js/modules/apollo/apollo-report.js"></script>
     <script src="../js/modules/shared/combined-export.js"></script>
-    <script src="../js/modules/audit/main.js"></script>
+    <script src="../js/modules/apollo/main.js"></script>
 </body>
 
 </html>

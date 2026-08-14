@@ -14,8 +14,8 @@ class PermissionSystem {
             'PS': ['produtividade', 'controle-dashboard'],
             'PA': ['produtividade', 'controle-dashboard'],
             'Coordenador': ['produtividade', 'feedback-faltas', 'controle-dashboard'],
-            'Supervisor': ['produtividade', 'feedback-faltas', 'audit-dashboard', 'controle-dashboard'],
-            'Gerente': ['produtividade', 'feedback-faltas', 'audit-dashboard', 'gestao-usuarios', 'controle-dashboard'],
+            'Supervisor': ['produtividade', 'feedback-faltas', 'audit-dashboard', 'apollo-dashboard', 'controle-dashboard'],
+            'Gerente': ['produtividade', 'feedback-faltas', 'audit-dashboard', 'apollo-dashboard', 'gestao-usuarios', 'controle-dashboard'],
             'ADM': ['*']
         };
     }
@@ -109,6 +109,16 @@ class PermissionSystem {
                 nome: 'Auditorias por Colaborador',
                 icone: 'fa-users-gear',
                 descricao: 'Auditorias agrupadas por colaborador'
+            },
+            'apollo-dashboard': {
+                nome: 'Dashboard Geral Apollo',
+                icone: 'fa-chart-pie',
+                descricao: 'Dashboard geral de auditoria Apollo'
+            },
+            'apollo-collaborator': {
+                nome: 'Auditorias Apollo por Colaborador',
+                icone: 'fa-users-gear',
+                descricao: 'Auditorias Apollo agrupadas por colaborador'
             },
             'controle-dashboard': {
                 nome: 'Controle e Infos',

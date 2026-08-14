@@ -13,7 +13,7 @@ window.addEventListener('introFinished', () => {
     initializeMenus();
     
     initializeScreens((screenName) => {
-        if (screenName === 'audit-collaborator') {
+        if (screenName === 'apollo-collaborator') {
             initializeCollaboratorFilters();
             initializeExportButtons();
             initializeReportExport();
@@ -22,9 +22,10 @@ window.addEventListener('introFinished', () => {
         }
     });
 
+    initializeConsolidatedExport();
+
     loadDashboardData();
     initializeCarousel();
-    initializeConsolidatedExport();
 });
 
 // Fallback

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Outbound System - Consolidado</title>
+<link href="../assets/img/favicon.ico" rel="icon" type="image/x-icon"/>
+<link href="../css/style.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&amp;family=Playfair+Display:ital,wght@1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+<!-- Overlay da Animação de Entrada -->
+<div id="preloader">
+<div class="brand-container" id="logoText"></div>
+<div class="subtitle-intro">System</div>
+</div>
+<!-- Conteúdo Real do Site -->
+<main class="hidden" id="main-content">
+<div class="dashboard-wrapper">
+<!-- Sidebar Retrátil -->
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-header">
+<h1 class="sidebar-title">
+<i class="fas fa-cube"></i>
+<a class="volt-index" href="../index.html">Outbound</a>
+</h1>
+<button class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+</div>
+<div class="sidebar-section">
+<p class="sidebar-label">MÓDULOS</p>
+<nav class="sidebar-menu">
+<!-- Menu com submenu para Controle e Infos -->
+<div class="menu-group">
+<a class="menu-item menu-parent" href="controleInfos.html" id="controle-parent">
+<span class="menu-icon"><i class="fas fa-gauge"></i></span>
+<span class="menu-text">Controle e Infos</span>
+<span class="menu-arrow"><i class="fas fa-chevron-down"></i></span>
+</a>
+<nav class="submenu" id="controle-submenu">
+<a class="menu-item submenu-item" data-screen="controle-dashboard" href="controleInfos.html">
+<span class="menu-icon"><i class="fas fa-chart-line"></i></span>
+<span class="menu-text">Dashboard Outbound</span>
+</a>
+<a class="menu-item submenu-item" data-screen="headcount" href="controleInfos.html">
+<span class="menu-icon"><i class="fas fa-users"></i></span>
+<span class="menu-text">HeadCount</span>
+</a>
+<a class="menu-item submenu-item" data-screen="labor" href="controleInfos.html">
+<span class="menu-icon"><i class="fas fa-person-hiking"></i></span>
+<span class="menu-text">Labor</span>
+</a>
+<a class="menu-item submenu-item" data-screen="tom" href="controleInfos.html">
+<span class="menu-icon"><i class="fas fa-truck"></i></span>
+<span class="menu-text">TOM - Transportes</span>
+</a>
+<a class="menu-item submenu-item" data-screen="insumos" href="controleInfos.html">
+<span class="menu-icon"><i class="fas fa-boxes"></i></span>
+<span class="menu-text">Insumos</span>
+</a>
+</nav>
+</div>
+<!-- Menu individual Auditoria HSE -->
+<div class="menu-group">
+<a class="menu-item menu-parent active" href="#" id="audit-parent">
+<span class="menu-icon"><i class="fas fa-clipboard-check"></i></span>
+<span class="menu-text">Auditoria HSE</span>
+<span class="menu-arrow"><i class="fas fa-chevron-down"></i></span>
+</a>
+<nav class="submenu active" id="audit-submenu">
+<a class="menu-item submenu-item" href="auditHse.html"><span class="menu-icon"><i class="fas fa-chart-pie"></i></span><span class="menu-text">Dashboard Geral</span></a>
+<a class="menu-item submenu-item" href="auditHse.html"><span class="menu-icon"><i class="fas fa-users-gear"></i></span><span class="menu-text">Auditorias por Colaborador</span></a>
+<a class="menu-item submenu-item active" href="consolidado.html"><span class="menu-icon"><i class="fas fa-chart-column"></i></span><span class="menu-text">Consolidado HSE + Apollo</span></a>
+</nav>
+</div>
+<a class="menu-item" href="auditApollo.html"><span class="menu-icon"><i class="fas fa-rocket"></i></span><span class="menu-text">Auditoria Apollo</span></a>
+<a class="menu-item" href="produtividade.html">
+<span class="menu-icon"><i class="fas fa-chart-line"></i></span>
+<span class="menu-text">Produtividade</span>
+</a>
+<a class="menu-item" href="feedbackFaltas.html">
+<span class="menu-icon"><i class="fas fa-comments"></i></span>
+<span class="menu-text">Feedback de Faltas</span>
+</a>
+<a class="menu-item" href="gestaoUsuarios.html">
+<span class="menu-icon"><i class="fas fa-users-cog"></i></span>
+<span class="menu-text">Gestão de Usuários</span>
+</a>
+</nav>
+</div>
+<div class="sidebar-section" id="future-telas-section" style="display: none;">
+<p class="sidebar-label">FUTURAS TELAS</p>
+<nav class="sidebar-menu">
+<a class="menu-item" href="#"><span class="menu-text">Futura tela (CPT)</span></a>
+<a class="menu-item" href="#"><span class="menu-text">Futura tela (Backlog)</span></a>
+<a class="menu-item" href="#"><span class="menu-text">Futura tela (WTD)</span></a>
+</nav>
+</div>
+<div class="sidebar-footer">
+<div class="user-card">
+<div class="user-avatar" id="sidebar-user-avatar">--</div>
+<div class="user-info">
+<p class="user-name" id="sidebar-user-name">Usuário</p>
+<p class="user-level" id="sidebar-user-level">Nível</p>
+</div>
+<button class="user-logout" id="sidebar-logout" title="Logout">
+<i class="fas fa-sign-out-alt"></i>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<div class="main-wrapper">
+<!-- Exportação Consolidada: HSE + Apollo -->
+
+<section class="consolidado-interface" id="consolidado-interface">
+<div class="consolidado-interface-header"><div><span class="eyebrow">CENTRAL DE EXPORTAÇÕES</span><h1>Consolidado HSE + Apollo</h1><p>Selecione o recorte dos dados e escolha o formato de saída para gerar a visão conjunta.</p></div><div class="consolidado-status-badge"><i class="fas fa-link"></i> HSE + Apollo conectados</div></div>
+<section class="consolidado-filter-card"><div class="consolidado-card-title"><span><i class="fas fa-sliders"></i> Filtros do consolidado</span><small>Os filtros serão usados no Excel, CSV e na imagem</small></div><div class="consolidado-filter-grid"><div class="filter-group"><label>Departamento</label><div class="multi-select-wrapper consolidated-multi-select" data-filter="department"><button type="button" class="multi-select-btn"><span class="multi-select-label">(Tudo)</span><span class="multi-select-arrow">▼</span></button><div class="multi-select-dropdown"><input class="multi-select-search" type="text" placeholder="Pesquisar..."/><div class="multi-select-options"><span class="multi-select-loading">Carregando departamentos...</span></div><div class="multi-select-footer"><button type="button" class="multi-select-clear">Limpar</button></div></div></div></div><div class="filter-group"><label>Funções</label><div class="multi-select-wrapper consolidated-multi-select" data-filter="function"><button type="button" class="multi-select-btn"><span class="multi-select-label">(Tudo)</span><span class="multi-select-arrow">▼</span></button><div class="multi-select-dropdown"><input class="multi-select-search" type="text" placeholder="Pesquisar..."/><div class="multi-select-options"><span class="multi-select-loading">Carregando funções...</span></div><div class="multi-select-footer"><button type="button" class="multi-select-clear">Limpar</button></div></div></div></div><div class="filter-group"><label for="date-start">Data inicial</label><input class="filter-input" id="date-start" type="date"/></div><div class="filter-group"><label for="date-end">Data final</label><input class="filter-input" id="date-end" type="date"/></div><div class="filter-group consolidated-filter-actions"><button class="btn-apply" id="apply-filters">Aplicar filtros</button><button class="btn-reset" id="reset-filters">Limpar</button></div></div></section>
+<section class="consolidado-export-options"><div class="consolidado-card-title"><span><svg class="export-section-icon" style="display:inline-block;width:1rem;height:1rem;" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Gerar exportação conjunta</span><small>A imagem usará os filtros definidos nesta tela</small></div><div class="consolidado-format-grid"><button class="consolidado-format-card consolidado-format-image" id="export-consolidated-img-btn"><svg class="export-card-icon" style="display:block;width:1.55rem;height:1.55rem;" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="9" r="1.4" fill="currentColor"/><path d="m5 17 4-4 3 3 2-2 5 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Imagem 16:9</strong><span>Dashboard visual usando os filtros desta tela</span></button><button class="consolidado-format-card consolidado-format-excel" id="export-consolidated-excel-btn"><svg class="export-card-icon" style="display:block;width:1.55rem;height:1.55rem;" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15 3v5h4M8 12h8M8 16h8M8 8h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><strong>Excel consolidado</strong><span>Dados HSE e Apollo em planilha única</span></button><button class="consolidado-format-card consolidado-format-csv" id="export-consolidated-csv-btn"><svg class="export-card-icon" style="display:block;width:1.55rem;height:1.55rem;" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15 3v5h4M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><strong>CSV consolidado</strong><span>Arquivo leve para análise e integração</span></button></div></section>
+<section class="consolidado-separation-info"><div class="consolidado-origin-chip hse-chip"><i class="fas fa-shield-halved"></i><div><strong>HSE</strong><span>Auditorias de segurança, conformidade e rotina operacional</span></div></div><div class="consolidado-origin-chip apollo-chip"><i class="fas fa-rocket"></i><div><strong>Apollo</strong><span>Auditorias e acompanhamento de metas por colaborador</span></div></div></section>
+</section>
+<!-- Tela: Auditorias por Colaborador -->
+<div class="screen" id="screen-audit-collaborator" style="display:none;">
+<div class="container">
+<!-- Título da Seção -->
+<section class="stats-section">
+<h1>Auditorias por Colaborador</h1>
+</section>
+<!-- Filtros de Período -->
+<section class="filters-section">
+<h2>Filtro de Período</h2>
+<div class="filters-grid">
+<div class="filter-group">
+<label for="collaborator-date-start">Data Início</label>
+<input class="filter-input" id="collaborator-date-start" type="date"/>
+</div>
+<div class="filter-group">
+<label for="collaborator-date-end">Data Fim</label>
+<input class="filter-input" id="collaborator-date-end" type="date"/>
+</div>
+<div class="filter-group filter-button-group">
+<button class="btn-apply" id="apply-collab-period-filters">Aplicar</button>
+<button class="btn-reset" id="reset-collab-period-filters">Limpar</button>
+</div>
+</div>
+</section>
+<!-- Cards de Estatísticas -->
+<section class="stats-section">
+<div class="stats-grid">
+<div class="stat-card">
+<div class="stat-value" id="collab-meta-atingida">-</div>
+<div class="stat-label">Meta Atingida</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="collab-meta-nao-atingida">-</div>
+<div class="stat-label">Meta Não Atingida</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="collab-sem-auditorias">-</div>
+<div class="stat-label">Sem Auditorias</div>
+</div>
+</div>
+</section>
+<!-- Tabela de Auditorias por Colaborador com Filtros Excel -->
+<section class="content-carousel-section">
+<div class="carousel-header">
+<h2>Tabela de Colaboradores</h2>
+<!-- Botoes de Exportacao -->
+<div class="export-buttons-container">
+<button aria-label="Exportar para Excel" class="export-btn export-btn-excel" id="export-excel-btn" title="Exportar para Excel">
+                                        📊
+                                    </button>
+<button aria-label="Exportar para CSV" class="export-btn export-btn-csv" id="export-csv-btn" title="Exportar para CSV">
+                                        📄
+                                    </button>
+<button aria-label="Exportar Relatório Visual" class="export-btn export-btn-report" id="export-report-btn" title="Exportar Relatório Visual">
+                                        📋
+                                    </button>
+</div>
+</div>
+<!-- Tabela -->
+<div class="table-wrapper">
+<table class="audits-table">
+<thead>
+<tr>
+<th>
+<div class="header-with-filter">
+                                                    Colaborador
+                                                    <input class="col-excel-filter-text" data-column="nome" placeholder="Buscar..." title="Digite para filtrar por nome" type="text"/>
+</div>
+</th>
+<th>
+<div class="header-with-filter">
+                                                    Departamento
+                                                    <div class="multi-select-wrapper" data-column="departamento">
+<button class="multi-select-btn">
+<span class="multi-select-label">(Tudo)</span>
+<span class="multi-select-arrow">▼</span>
+</button>
+<div class="multi-select-dropdown">
+<input class="multi-select-search" placeholder="Pesquisar..." type="text"/>
+<div class="multi-select-options"></div>
+<div class="multi-select-footer">
+<button class="multi-select-clear">Limpar</button>
+</div>
+</div>
+</div>
+</div>
+</th>
+<th>
+<div class="header-with-filter">
+                                                    Função
+                                                    <div class="multi-select-wrapper" data-column="funcao">
+<button class="multi-select-btn">
+<span class="multi-select-label">(Tudo)</span>
+<span class="multi-select-arrow">▼</span>
+</button>
+<div class="multi-select-dropdown">
+<input class="multi-select-search" placeholder="Pesquisar..." type="text"/>
+<div class="multi-select-options"></div>
+<div class="multi-select-footer">
+<button class="multi-select-clear">Limpar</button>
+</div>
+</div>
+</div>
+</div>
+</th>
+<th style="text-align:center">Período</th>
+<th style="text-align:center">Realizado</th>
+<th style="text-align:center">Meta</th>
+<th>
+<div class="header-with-filter">
+                                                    Status
+                                                    <div class="multi-select-wrapper" data-column="status">
+<button class="multi-select-btn">
+<span class="multi-select-label">(Tudo)</span>
+<span class="multi-select-arrow">▼</span>
+</button>
+<div class="multi-select-dropdown">
+<div class="multi-select-options">
+<label class="multi-select-option"><input type="checkbox" value="Meta Atingida"/> Meta Atingida</label>
+<label class="multi-select-option"><input type="checkbox" value="Meta Não Atingida"/> Meta Não Atingida</label>
+<label class="multi-select-option"><input type="checkbox" value="Sem Auditorias"/> Sem Auditorias</label>
+</div>
+<div class="multi-select-footer">
+<button class="multi-select-clear">Limpar</button>
+</div>
+</div>
+</div>
+</div>
+</th>
+</tr>
+</thead>
+<tbody id="collaborator-table-body"></tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+</div>
+</div>
+<!-- Área Oculta para Captura do Relatório Visual -->
+<div id="report-export-wrapper" style="position: absolute; left: -9999px; top: -9999px;">
+<!-- O conteúdo será injetado pelo report-engine.js -->
+</div>
+</main>
+<!-- Scripts Core -->
+<script src="../js/core/utils.js"></script>
+<script src="../js/core/ui-controller.js"></script>
+<script src="../js/core/animation.js"></script>
+<script src="../js/core/auth.js"></script>
+<script src="../js/core/permissions.js"></script>
+<script src="../js/core/menu-controller.js"></script>
+<script src="../js/core/sidebar-user.js"></script>
+<script>document.body.classList.add("consolidado-page");</script>
+<script src="../js/modules/shared/combined-export.js?v=20260813-detalhes4"></script>
+<script src="../js/modules/shared/consolidado-main.js?v=20260813-detalhes4"></script>
+</body>
+</html>

@@ -10,6 +10,7 @@ const MenuController = {
     permissoes: {
         'controleInfos.html': 'PS', // Todos têm acesso
         'auditHse.html': 'Supervisor',
+        'auditApollo.html': 'Supervisor',
         'feedbackFaltas.html': 'Coordenador',
         'gestaoUsuarios.html': 'Gerente',
         'produtividade.html': 'PS' // Todos tém acesso
@@ -19,6 +20,7 @@ const MenuController = {
     elementosModulo: {
         'controleInfos.html': ['.menu-item[href*="controleInfos.html"]', '.menu-group:has(a[href*="controleInfos.html"])', '#controle-parent', '#controle-submenu', '.menu-item:has(.fa-gauge)'],
         'auditHse.html': ['.menu-item[href*="auditHse.html"]', '.menu-group:has(a[href*="auditHse.html"])', '#audit-parent', '#audit-submenu', '.menu-item:has(.fa-clipboard-check)'],
+        'auditApollo.html': ['.menu-item[href*="auditApollo.html"]', '.menu-group:has(a[href*="auditApollo.html"])', '#apollo-parent', '#apollo-submenu', '.menu-item:has(.fa-rocket)'],
         'feedbackFaltas.html': ['.menu-item[href*="feedbackFaltas.html"]', '.menu-item[data-screen="feedback-main"]', '.menu-item:has(.fa-comments)'],
         'gestaoUsuarios.html': ['.menu-item[href*="gestaoUsuarios.html"]', '.menu-item:has(.fa-users-cog)'],
         'produtividade.html': ['.menu-item[href*="produtividade.html"]', '.menu-item:has(.fa-chart-line)']
@@ -72,6 +74,7 @@ const MenuController = {
                     const nomesMap = {
                         'controleinfos': 'controle e infos',
                         'audithse': 'auditoria hse',
+                        'auditapollo': 'auditoria apollo',
                         'feedbackfaltas': 'feedback de faltas',
                         'gestaousuarios': 'gestão de usuários',
                         'produtividade': 'produtividade'
@@ -113,12 +116,15 @@ const MenuController = {
             /* Eles serão re-exibidos via JS se o usuário tiver permissão */
             .menu-item[href*="controleInfos.html"],
             .menu-item[href*="auditHse.html"], 
+            .menu-item[href*="auditApollo.html"], 
             .menu-item[href*="gestaoUsuarios.html"],
             .menu-item[href*="feedbackFaltas.html"],
             .menu-group:has(a[href*="controleInfos.html"]),
             .menu-group:has(a[href*="auditHse.html"]),
+            .menu-group:has(a[href*="auditApollo.html"]),
             #controle-parent,
-            #audit-parent { 
+            #audit-parent,
+            #apollo-parent { 
                 display: none !important; 
             }
         `;

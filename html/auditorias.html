@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outbound System - Auditoria HSE</title>
+    <title>Outbound System - Auditorias</title>
     <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico">
     <link rel="stylesheet" href="../css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
@@ -67,20 +67,32 @@
                                 </a>
                             </nav>
                         </div>
-                        <!-- Menu individual Auditoria HSE -->
+                        <!-- Módulo unificado de Auditorias -->
                         <div class="menu-group">
-                            <a href="#" class="menu-item menu-parent active" id="audit-parent">
+                            <a href="auditorias.html" class="menu-item menu-parent active" id="auditorias-parent">
                                 <span class="menu-icon"><i class="fas fa-clipboard-check"></i></span>
-                                <span class="menu-text">Auditoria HSE</span>
+                                <span class="menu-text">Auditorias</span>
                                 <span class="menu-arrow"><i class="fas fa-chevron-down"></i></span>
                             </a>
-                            <nav class="submenu active" id="audit-submenu">
-                                <a href="#" class="menu-item submenu-item active" data-screen="audit-dashboard"><span class="menu-icon"><i class="fas fa-chart-pie"></i></span><span class="menu-text">Dashboard Geral</span></a>
-                                <a href="#" class="menu-item submenu-item" data-screen="audit-collaborator"><span class="menu-icon"><i class="fas fa-users-gear"></i></span><span class="menu-text">Auditorias por Colaborador</span></a>
-                                <a href="consolidado.html" class="menu-item submenu-item"><span class="menu-icon"><i class="fas fa-chart-column"></i></span><span class="menu-text">Consolidado HSE + Apollo</span></a>
+                            <nav class="submenu active" id="auditorias-submenu">
+                                <a href="auditorias.html" class="menu-item submenu-item" data-screen="auditorias-dashboard">
+                                    <span class="menu-icon"><i class="fas fa-layer-group"></i></span>
+                                    <span class="menu-text">Todas as Auditorias</span>
+                                </a>
+                                <a href="auditHse.html" class="menu-item submenu-item">
+                                    <span class="menu-icon"><i class="fas fa-shield-halved"></i></span>
+                                    <span class="menu-text">Visão HSE</span>
+                                </a>
+                                <a href="auditApollo.html" class="menu-item submenu-item">
+                                    <span class="menu-icon"><i class="fas fa-rocket"></i></span>
+                                    <span class="menu-text">Visão Apollo</span>
+                                </a>
                             </nav>
                         </div>
-                        <a href="auditApollo.html" class="menu-item"><span class="menu-icon"><i class="fas fa-rocket"></i></span><span class="menu-text">Auditoria Apollo</span></a>
+                        <a href="consolidado.html" class="menu-item">
+                            <span class="menu-icon"><i class="fas fa-chart-column"></i></span>
+                            <span class="menu-text">Consolidado</span>
+                        </a>
                         <a href="produtividade.html" class="menu-item">
                             <span class="menu-icon"><i class="fas fa-chart-line"></i></span>
                             <span class="menu-text">Produtividade</span>
@@ -121,7 +133,11 @@
 
             <!-- Main Content -->
             <div class="main-wrapper">
-                <!-- Tela: Dashboard Geral de Auditoria HSE -->
+                <!-- Visão integrada do módulo Auditorias -->
+                <section class="auditorias-unified-panel" id="auditorias-unified-content">
+                    <div class="auditorias-unified-loading">Carregando HSE e Apollo...</div>
+                </section>
+                <!-- Tela: Dashboard Geral de Auditorias -->
                 <div id="screen-audit-dashboard" class="screen active">
                     <div class="container">
                         <!-- Filtros Gerais -->
@@ -151,7 +167,7 @@
 
                         <!-- Estatísticas -->
                         <section class="stats-section">
-                            <h1>Dashboard de Auditorias HSE</h1>
+                            <h1>Dashboard de Auditorias</h1>
                             <div class="stats-grid">
                                 <div class="stat-card">
                                     <div class="stat-value" id="total-audits">-</div>
@@ -391,6 +407,7 @@
     <script src="../js/modules/audit/report-engine.js"></script>
     <script src="../js/modules/audit/audit-report.js"></script>
     <script src="../js/modules/shared/combined-export.js"></script>
+    <script src="../js/modules/shared/auditorias-unified.js"></script>
     <script src="../js/modules/audit/main.js"></script>
 </body>
 

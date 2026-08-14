@@ -1,8 +1,8 @@
 /**
- * Módulo de Dashboard de Auditoria HSE
+ * Módulo de Dashboard de Auditoria Apollo
  */
 
-const API_URL = "https://script.google.com/macros/s/AKfycbzY_J3ODgUI6VTpCgzoBcw-RzImTlxDjzOlgxY5HQ3F4EK8aNQl25K2FqW13LGG-Eb77Q/exec?aba=Query";
+const API_URL = "https://script.google.com/macros/s/AKfycbzY_J3ODgUI6VTpCgzoBcw-RzImTlxDjzOlgxY5HQ3F4EK8aNQl25K2FqW13LGG-Eb77Q/exec?aba=Query Apollo";
 const API_CONFRONTO_URL = "https://script.google.com/macros/s/AKfycbzY_J3ODgUI6VTpCgzoBcw-RzImTlxDjzOlgxY5HQ3F4EK8aNQl25K2FqW13LGG-Eb77Q/exec?aba=Base Outbond Realizado";
 
 let allData = [];
@@ -10,9 +10,24 @@ let confrontoData = [];
 let filteredData = [];
 window.__auditFiltersExplicit = false;
 let departmentChart = null;
-let scoreChart = null;
+let typeChart = null;
 let currentSlide = 0;
-const slidesTitles = ["Visão Geral (Gráfico)", "Score das Auditorias", "Últimas Auditorias"];
+const slidesTitles = ["Visão Geral (Gráfico)", "Tipos de Auditoria", "Últimas Auditorias"];
+
+// Nomes reais das colunas retornadas pela API (aba "Query Apollo")
+const FIELD_DATE = 'Created At';
+const FIELD_CREATED_BY = 'Created By';
+const FIELD_WAREHOUSE = 'Warehouse';
+const FIELD_AREA_AUDITORA = 'Selecione A área Auditora:';
+const FIELD_ASSOCIATE_LOGIN = 'Associate Login';
+const FIELD_TIPO_AUDITORIA = 'Tipo Auditoria';
+const FIELD_DEPARTAMENTO = 'Departamento';
+const FIELD_FUNCAO = 'Função';
+const FIELD_CPF = 'CPF';
+const FIELD_NOME = 'Nome';
+
+// Meta de auditorias Apollo por colaborador, por dia
+const APOLLO_META_DIARIA = 5;
 
 async function loadDashboardData() {
     const loadingSpinner = document.getElementById('loading-spinner');
@@ -46,6 +61,15 @@ async function loadDashboardData() {
         try { updateCharts(); } catch (err) { console.error("Erro em updateCharts:", err); }
         try { updateTable(); } catch (err) { console.error("Erro em updateTable:", err); }
         try { populateFilters(); } catch (err) { console.error("Erro em populateFilters:", err); }
+        try { initializeApolloExportButtons(); } catch (err) { console.error("Erro em initializeApolloExportButtons:", err); }
+
+        // Atualiza a aba "Auditorias por Colaborador" mesmo que o usuário já tenha
+        // trocado para ela antes deste carregamento assíncrono terminar
+        try {
+            if (typeof populateCollaboratorOptions === 'function') populateCollaboratorOptions();
+            if (typeof updateCollaboratorTable === 'function') updateCollaboratorTable();
+            if (typeof updateCollaboratorStats === 'function') updateCollaboratorStats();
+        } catch (err) { console.error("Erro ao atualizar aba de colaboradores:", err); }
 
         if (loadingSpinner) loadingSpinner.style.display = 'none';
     } catch (e) {
@@ -64,30 +88,25 @@ async function loadDashboardData() {
 
 function updateStats() {
     const totalAuditsEl = document.getElementById('total-audits');
-    const avgScoreEl = document.getElementById('avg-score');
+    const totalTypesEl = document.getElementById('total-types');
     const totalDeptsEl = document.getElementById('total-departments');
-    const conformitiesEl = document.getElementById('conformities');
+    const totalAreasEl = document.getElementById('total-areas');
 
     if (totalAuditsEl) totalAuditsEl.textContent = filteredData.length;
 
-    const totalScore = filteredData.reduce((acc, curr) => {
-        const scoreStr = (curr.Score || "0").toString();
-        const val = parseFloat(scoreStr.replace('%', '')) || 0;
-        return acc + val;
-    }, 0);
-    const avg = filteredData.length > 0 ? (totalScore / filteredData.length).toFixed(1) : 0;
-    if (avgScoreEl) avgScoreEl.textContent = avg + '%';
+    const types = new Set(filteredData.map(d => d[FIELD_TIPO_AUDITORIA]).filter(Boolean));
+    if (totalTypesEl) totalTypesEl.textContent = types.size;
 
-    const depts = new Set(filteredData.map(d => d.Departamento).filter(Boolean));
+    const depts = new Set(filteredData.map(d => d[FIELD_DEPARTAMENTO]).filter(Boolean));
     if (totalDeptsEl) totalDeptsEl.textContent = depts.size;
 
-    const conf = filteredData.reduce((acc, curr) => acc + (parseInt(curr.Conformidades) || 0), 0);
-    if (conformitiesEl) conformitiesEl.textContent = conf;
+    const areas = new Set(filteredData.map(d => d[FIELD_AREA_AUDITORA]).filter(Boolean));
+    if (totalAreasEl) totalAreasEl.textContent = areas.size;
 }
 
 function updateCharts() {
     updateDepartmentChart();
-    updateScoreChart();
+    updateTypeChart();
 }
 
 function updateDepartmentChart() {
@@ -95,7 +114,7 @@ function updateDepartmentChart() {
     const dataFor7Days = filterDataByLast7Days(filteredData);
     const auditsByDate = {};
     dataFor7Days.forEach(item => {
-        const d = parseAnyDate(item.Data);
+        const d = parseAnyDate(item[FIELD_DATE]);
         if (d) {
             const key = d.toISOString().split('T')[0];
             auditsByDate[key] = (auditsByDate[key] || 0) + 1;
@@ -139,31 +158,28 @@ function updateDepartmentChart() {
     });
 }
 
-function updateScoreChart() {
+function updateTypeChart() {
     // Garantir que apenas os últimos 7 dias sejam exibidos
     const dataFor7Days = filterDataByLast7Days(filteredData);
-    const ranges = { '90-100%': 0, '70-89%': 0, '50-69%': 0, '< 50%': 0 };
+    const counts = {};
     dataFor7Days.forEach(item => {
-        const scoreStr = (item.Score || "0").toString();
-        const score = parseFloat(scoreStr.replace('%', '')) || 0;
-        if (score >= 90) ranges['90-100%']++;
-        else if (score >= 70) ranges['70-89%']++;
-        else if (score >= 50) ranges['50-69%']++;
-        else ranges['< 50%']++;
+        const tipo = item[FIELD_TIPO_AUDITORIA] || 'Não informado';
+        counts[tipo] = (counts[tipo] || 0) + 1;
     });
 
     const canvas = document.getElementById('scoreChart');
     if (!canvas) return;
 
+    const palette = ['#10b981', '#38bdf8', '#f59e0b', '#ef4444', '#a78bfa', '#f472b6', '#facc15'];
     const ctx = canvas.getContext('2d');
-    if (scoreChart) scoreChart.destroy();
-    scoreChart = new Chart(ctx, {
+    if (typeChart) typeChart.destroy();
+    typeChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: Object.keys(ranges),
+            labels: Object.keys(counts),
             datasets: [{
-                data: Object.values(ranges),
-                backgroundColor: ['#10b981', '#38bdf8', '#f59e0b', '#ef4444']
+                data: Object.values(counts),
+                backgroundColor: Object.keys(counts).map((_, i) => palette[i % palette.length])
             }]
         },
         options: {
@@ -177,22 +193,26 @@ function updateScoreChart() {
 function updateTable() {
     const tbody = document.getElementById('table-body');
     if (!tbody) return;
-    tbody.innerHTML = filteredData.slice(0, 15).map(audit => `
+    tbody.innerHTML = filteredData.slice(0, 15).map(audit => {
+        const d = parseAnyDate(audit[FIELD_DATE]);
+        const dataFormatada = d ? d.toLocaleDateString('pt-BR') : (audit[FIELD_DATE] || '-');
+        return `
         <tr>
-            <td>${audit.Departamento}</td>
-            <td>${audit.Usuário}</td>
-            <td>${audit.Formulário}</td>
-            <td><span class="score-badge" style="background:${getScoreColor(audit.Score)}">${audit.Score}</span></td>
-            <td>${audit.Conformidades}</td>
-            <td>${audit['Não Conformidades']}</td>
+            <td>${audit[FIELD_WAREHOUSE] || '-'}</td>
+            <td>${audit[FIELD_DEPARTAMENTO] || '-'}</td>
+            <td>${audit[FIELD_NOME] || '-'}</td>
+            <td>${audit[FIELD_FUNCAO] || '-'}</td>
+            <td>${audit[FIELD_TIPO_AUDITORIA] || '-'}</td>
+            <td>${dataFormatada}</td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function populateFilters() {
     const deptFilter = document.getElementById('department-filter');
     if (!deptFilter) return;
-    const depts = [...new Set(allData.map(d => d.Departamento))].sort();
+    const depts = [...new Set(allData.map(d => d[FIELD_DEPARTAMENTO]))].filter(Boolean).sort();
     deptFilter.innerHTML = '<option value="">Todos os Departamentos</option>' +
         depts.map(d => `<option value="${d}">${d}</option>`).join('');
 
@@ -206,7 +226,7 @@ function filterDataByLast7Days(data) {
     today.setHours(23, 59, 59, 999);
 
     return data.filter(item => {
-        const d = parseAnyDate(item.Data);
+        const d = parseAnyDate(item[FIELD_DATE]);
         if (!d) return false;
         return d >= sevenDaysAgo && d <= today;
     });
@@ -227,8 +247,8 @@ function initializeDashboardFilters() {
             const end = dateEnd.value ? new Date(dateEnd.value + 'T23:59:59') : null;
 
             filteredData = allData.filter(item => {
-                const d = parseAnyDate(item.Data);
-                if (dept && item.Departamento !== dept) return false;
+                const d = parseAnyDate(item[FIELD_DATE]);
+                if (dept && item[FIELD_DEPARTAMENTO] !== dept) return false;
                 if (start && d < start) return false;
                 if (end && d > end) return false;
                 return true;
@@ -295,5 +315,5 @@ function goToSlide(slideIndex) {
     if (titleElement) titleElement.textContent = slidesTitles[currentSlide];
 
     if (currentSlide === 0 && departmentChart) setTimeout(() => departmentChart.resize(), 100);
-    else if (currentSlide === 1 && scoreChart) setTimeout(() => scoreChart.resize(), 100);
+    else if (currentSlide === 1 && typeChart) setTimeout(() => typeChart.resize(), 100);
 }

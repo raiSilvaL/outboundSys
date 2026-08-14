@@ -53,12 +53,15 @@ function parseInputDate(value, endOfDay = false) {
 
 function parseAnyDate(dateStr) {
     if (!dateStr) return null;
-    if (dateStr instanceof Date) return dateStr;
+    if (dateStr instanceof Date) {
+        return isNaN(dateStr.getTime()) ? null : dateStr;
+    }
 
     // Tenta DD/MM/YYYY
     if (typeof dateStr === 'string' && dateStr.includes('/')) {
-        const [d, m, y] = dateStr.split('/');
-        return new Date(y, m - 1, d);
+        const [d, m, y] = dateStr.split('/').map(Number);
+        const parsed = new Date(y, m - 1, d);
+        return isNaN(parsed.getTime()) ? null : parsed;
     }
 
     const d = new Date(dateStr);
